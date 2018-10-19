@@ -7,4 +7,12 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(tidyverse)
+library(knitr)
 ```
+
+```{r}
+raw_data <- read_csv("SelectCovariates_13 Oct 2016.csv")
+```
+

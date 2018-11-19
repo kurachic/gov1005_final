@@ -1,49 +1,11 @@
 library(shiny)
-library(readr)
-library(readxl)
-library(dplyr)
-library(tidyverse)
-library(knitr)
+library(shinythemes)
 library(DT)
 
-included_only <- read_csv("Data/SelectCovariates_13 Oct 2016.csv")
-
-all_data <- read_csv("Data/philly_vars.csv")
-
-labels <- read_excel("Data/Covariate_labels.xlsx")
-
-combo <- included_only %>%
-  left_join(all_data, by = "RefNum")
-
-wage_data <- combo %>%
-  filter(!is.na(MonthWageCl.x), MonthWageCl.x != 0, !is.na(AmtMnthIncOP.x), AmtMnthIncOP.x != 0)
-
-number_zero_cl <- combo %>%
-  select(RefNum, MonthWageCl.x) %>%
-  filter(MonthWageCl.x == 0) %>%
-  count(MonthWageCl.x)
-
-number_zero_op <- combo %>%
-  select(RefNum, AmtMnthIncOP.x) %>%
-  filter(AmtMnthIncOP.x == 0) %>%
-  count(AmtMnthIncOP.x)
-
-marr_data <- combo %>%
-  select(lengthmar.x) %>%
-  filter(! is.na(lengthmar.x))
-  
-race_data <- combo %>%
-  # subtracting 2 from white clients due to 2 people marking both white and hispanic - counting white hispanics as just hispanic
-  summarize(Black = sum((IsBlaCl.y)), White = (sum(IsWhiCl.y) - 2), Hispanic = sum(IsHisCl.y), Asian = sum(IsAsiCl), Other = sum(IsOthCl)) %>%
-  gather(key = "race", "value" = n, Black, White, Hispanic, Asian, Other)
-
-ben_data <- combo %>%
-  filter(IsBenSpSupCl.x == 1 | IsTANFCl == 1 | IsSSIOrSSDICl.x == 1 | IsSSCl == 1 | IsOthRetCl == 1 | IsUnempCl == 1 | IsFdStmpCl.x == 1 | IsOthIncCl == 1) %>%
-  summarize(n = n())
-
+load("Data/my_work_space.RData")
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
+ui <- fluidPage(theme = shinytheme("yeti"),
    
   titlePanel("Access to Justice Lab - Philadelphia Divorce Study"),
   
@@ -97,10 +59,12 @@ ui <- fluidPage(
                ),
              
              mainPanel(
+               h2("Marriage Length"),
                h5("Below is a histogram of the length of the participants' marriages in years."),
-               plotOutput("marrPlot")
-               )
+               plotOutput("marrPlot"),
+               h2("Domestic Abuse")
              )
+      )
     )
   )
 )

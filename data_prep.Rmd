@@ -155,18 +155,19 @@ for(i in 1:length(var_names)) {
 }
 
 asset<-asset %>%
-  # group_by(filingstatus3, var) %>%
-  # summarise(mean = mean(val, na.rm = TRUE), sd = sd(val, na.rm = TRUE)) %>%
-  # unite(mean_sd, mean, sd) %>%
-  # spread(filingstatus3, mean_sd) %>%
-  # separate(none_filed, into = c("nf_mean", "nf_sd"), sep = "_") %>%
-  # separate(spouse_filed, into = c("s_mean", "s_sd"), sep = "_") %>%
-  # group_by(var) %>%
-  # mutate(nf_mean = as.numeric(nf_mean), s_mean = as.numeric(s_mean), nf_sd = as.numeric(nf_sd), s_sd = as.numeric(s_sd), mean_diff = s_mean - nf_mean, se = sqrt((s_sd^2 / 67) + (nf_sd^2 / 310)), t_score = mean_diff / se) %>%
-  # unite(none_filed, nf_mean, nf_sd) %>%
-  # unite(spouse_filed, s_mean, s_sd) %>%
-  # gather(key = "filing_status", "value" = mean_sd, none_filed, spouse_filed) %>%
-  # separate(mean_sd, c("mean", "sd"), sep = "_")
+  group_by(filingstatus3, var) %>%
+  summarise(mean = mean(val, na.rm = TRUE), sd = sd(val, na.rm = TRUE), p_val = mean(p_val)) %>%
+  unite(mean_sd, mean, sd) %>%
+  spread(filingstatus3, mean_sd) %>%
+  separate(none_filed, into = c("nf_mean", "nf_sd"), sep = "_") %>%
+  separate(spouse_filed, into = c("s_mean", "s_sd"), sep = "_") %>%
+  group_by(var) %>%
+  mutate(nf_mean = as.numeric(nf_mean), s_mean = as.numeric(s_mean), nf_sd = as.numeric(nf_sd), s_sd = as.numeric(s_sd), mean_diff = s_mean - nf_mean) %>%
+  unite(none_filed, nf_mean, nf_sd) %>%
+  unite(spouse_filed, s_mean, s_sd) %>%
+  gather(key = "filing_status", "value" = mean_sd, none_filed, spouse_filed) %>%
+  separate(mean_sd, c("mean", "sd"), sep = "_") %>%
+  select(var, filing_status, mean, mean_diff, p_val)
 
 
   # mutate(var = as.factor(var)) %>%

@@ -144,17 +144,31 @@ asset$OwnLoan[asset$num_Loan != 0] <- 1
 asset <- asset %>%
   select(filingstatus3, clownasset, OwnREH, num_REH, ClOwnREH, desshareREH, OwnAuto,num_Auto, ClOwnAuto, desshareAuto, OwnPenAnn, num_PenAnn, clownPenAnn, dessharePenAnn, OwnBkAcct, num_BkAcct, clownBkAcct, desshareBkAcct, OwnBus, num_Bus, clownBus, desshareBus, OwnCC, num_CC, clownCC, desOPCC, OwnLoan, num_Loan, clownLoan, desOPLoan) %>%
   gather(key = "var", value = "val", clownasset, OwnREH, num_REH, ClOwnREH, desshareREH, OwnAuto, num_Auto, ClOwnAuto, desshareAuto, OwnPenAnn, num_PenAnn, clownPenAnn, dessharePenAnn, OwnBkAcct, num_BkAcct, clownBkAcct, desshareBkAcct, OwnBus, num_Bus, clownBus, desshareBus, OwnCC, num_CC, clownCC, desOPCC, OwnLoan, num_Loan, clownLoan, desOPLoan) %>%
-  mutate(val = as.numeric(val)) %>%
-  group_by(filingstatus3, var) %>%
-  summarise(mean = mean(val, na.rm = TRUE), sd = sd(val, na.rm = TRUE)) %>%
-  unite(mean_sd, mean, sd, sep = "-") %>%
-  spread(filingstatus3, mean_sd) %>%
-  separate(col = none_filed, into = c("none_filed_mean", "none_filed_sd"), sep = "-") %>%
-  separate(col = spouse_filed, into = c("spouse_filed_mean", "spouse_filed_sd"), sep = "-") %>%
-  mutate(spouse_filed_mean = as.numeric(spouse_filed_mean), spouse_filed_sd = as.numeric(spouse_filed_sd), none_filed_mean = as.numeric(none_filed_mean), none_filed_sd = as.numeric(none_filed_sd)) %>%
-  group_by(var) %>%
-  mutate(meandiff = spouse_filed_mean - none_filed_mean) %>%
-  mutate(se = sqrt((spouse_filed_sd^2 / 67) + (none_filed_sd^2 / 310)))
+  mutate(val = as.numeric(val), p_val = 0) 
+
+var_names <- list("clownasset", "OwnREH", "num_REH", "ClOwnREH", "desshareREH", "OwnAuto", "num_Auto", "ClOwnAuto", "desshareAuto", "OwnPenAnn", "num_PenAnn", "clownPenAnn", "dessharePenAnn", "OwnBkAcct", "num_BkAcct", "clownBkAcct", "desshareBkAcct", "OwnBus", "num_Bus", "clownBus", "desshareBus", "OwnCC", "num_CC", "clownCC", "desOPCC", "OwnLoan", "num_Loan", "clownLoan", "desOPLoan")
+
+i <- 1
+
+for(i in 1:length(var_names)) {
+  asset$p_val[asset$var == var_names[i]] <- t.test(asset$val[asset$var == var_names[i]] ~ asset$filingstatus3[asset$var == var_names[i]], conf.level = 0.95)$p.value
+}
+
+asset<-asset %>%
+  # group_by(filingstatus3, var) %>%
+  # summarise(mean = mean(val, na.rm = TRUE), sd = sd(val, na.rm = TRUE)) %>%
+  # unite(mean_sd, mean, sd) %>%
+  # spread(filingstatus3, mean_sd) %>%
+  # separate(none_filed, into = c("nf_mean", "nf_sd"), sep = "_") %>%
+  # separate(spouse_filed, into = c("s_mean", "s_sd"), sep = "_") %>%
+  # group_by(var) %>%
+  # mutate(nf_mean = as.numeric(nf_mean), s_mean = as.numeric(s_mean), nf_sd = as.numeric(nf_sd), s_sd = as.numeric(s_sd), mean_diff = s_mean - nf_mean, se = sqrt((s_sd^2 / 67) + (nf_sd^2 / 310)), t_score = mean_diff / se) %>%
+  # unite(none_filed, nf_mean, nf_sd) %>%
+  # unite(spouse_filed, s_mean, s_sd) %>%
+  # gather(key = "filing_status", "value" = mean_sd, none_filed, spouse_filed) %>%
+  # separate(mean_sd, c("mean", "sd"), sep = "_")
+
+
   # mutate(var = as.factor(var)) %>%
   # mutate(var = fct_relevel(var, c("clownasset", "OwnREH", "num_REH", "ClOwnREH", "desshareREH", "OwnAuto", "num_Auto", "ClOwnAuto", "desshareAuto", "OwnPenAnn", "num_PenAnn", "clownPenAnn", "dessharePenAnn", "OwnBkAcct", "num_BkAcct", "clownBkAcct", "desshareBkAcct", "OwnBus", "num_Bus", "clownBus", "desshareBus", "OwnCC", "num_CC", "clownCC", "desOPCC", "OwnLoan", "num_Loan", "clownLoan", "desOPLoan"))) %>%
   # group_by(var)

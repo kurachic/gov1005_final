@@ -12,43 +12,153 @@ library(readxl)
 library(dplyr)
 library(tidyverse)
 library(knitr)
-library(DT)
 ```
 
 ```{r message = FALSE}
+# random stuff 
+
 included_only <- read_csv("gov1005_final_app/Data/SelectCovariates_13 Oct 2016.csv")
 
 all_data <- read_csv("gov1005_final_app/Data/philly_vars.csv")
 
 labels <- read_excel("gov1005_final_app/Data/Covariate_labels.xlsx")
 
-combo <- included_only %>%
+combo_included <- included_only %>%
   left_join(all_data, by = "RefNum")
 
-wage_data <- combo %>%
+wage_data <- combo_included %>%
   filter(!is.na(MonthWageCl.x), MonthWageCl.x != 0, !is.na(AmtMnthIncOP.x), AmtMnthIncOP.x != 0)
 
-number_zero_cl <- combo %>%
+number_zero_cl <- combo_included %>%
   select(RefNum, MonthWageCl.x) %>%
   filter(MonthWageCl.x == 0) %>%
   count(MonthWageCl.x)
 
-number_zero_op <- combo %>%
+number_zero_op <- combo_included %>%
   select(RefNum, AmtMnthIncOP.x) %>%
   filter(AmtMnthIncOP.x == 0) %>%
   count(AmtMnthIncOP.x)
 
-marr_data <- combo %>%
+marr_data <- combo_included %>%
   select(lengthmar.x) %>%
   filter(! is.na(lengthmar.x))
   
-race_data <- combo %>%
+race_data <- combo_included %>%
   # subtracting 2 from white clients due to 2 people marking both white and hispanic - counting white hispanics as just hispanic
   summarize(Black = sum((IsBlaCl.y)), White = (sum(IsWhiCl.y) - 2), Hispanic = sum(IsHisCl.y), Asian = sum(IsAsiCl), Other = sum(IsOthCl)) %>%
   gather(key = "race", "value" = n, Black, White, Hispanic, Asian, Other)
 
-ben_data <- combo %>%
+ben_data <- combo_included %>%
   filter(IsBenSpSupCl.x == 1 | IsTANFCl == 1 | IsSSIOrSSDICl.x == 1 | IsSSCl == 1 | IsOthRetCl == 1 | IsUnempCl == 1 | IsFdStmpCl.x == 1 | IsOthIncCl == 1) %>%
   summarize(n = n())
+
+dom_abuse <- combo_included %>%
+  select(IsPFAAgstCl, DatePFAAgstCl, IsPFAAgstClPhCnty, IsPFAAgstClStillEff, IsPFAProtCl.x, DatePFAProtCl, IsPFAProtClPhCnty, IsPFAProtClStillEff, IsPFAAgstOP.x)
+```
+
+```{r}
+# prep demographic data
+
+demo_data <- all_data %>%
+  mutate(IsMentPhysCl = 0, IsMentPhysOp = 0, IsAlcoSubsCl = 0, IsAlcoSubsOp = 0)
+
+demo_data$IsMentPhysCl[demo_data$IsMentCl == 1 | demo_data$IsPhysCl == 1] <- 1
+demo_data$IsMentPhysOp[demo_data$IsMentOP == 1 | demo_data$IsPhysOP == 1] <- 1
+demo_data$IsAlcoSubsCl[demo_data$IsAlcoCl == 1 | demo_data$IsSubsCl == 1] <- 1
+demo_data$IsAlcoSubsOp[demo_data$IsAlcoOP == 1 | demo_data$IsSubsOP == 1] <- 1
+
+demo_data$filingstatus3[demo_data$filingstatus3 == "Spouse filed, client does not want divorce" | demo_data$filingstatus3 == "Spouse filed, client wants divorce"] <- "Spouse filed"
+demo_data$filingstatus3[demo_data$filingstatus3 == "Nothing filed, client wants divorce"] <- "Nothing filed"
+
+demo_data$LangHH[demo_data$LangHH != "English"] <- 0
+demo_data$LangHH[demo_data$LangHH == "English"] <- 1
+
+demo_data <- demo_data %>%
+  select(filingstatus3, IsFemCl, age, IsBlaCl, IsHisCl, IsWhiCl,
+         IsOthAsiCl, LangHH, IsMentPhysCl, IsMentPhysOp,
+         IsAlcoSubsCl, IsAlcoSubsOp, IsCrimCl, IsCrimOP) %>%
+  gather(key = "var", value = "val", IsFemCl, age, IsBlaCl, IsHisCl, IsWhiCl, IsOthAsiCl, LangHH, IsMentPhysCl, IsMentPhysOp, IsAlcoSubsCl, IsAlcoSubsOp, IsCrimCl, IsCrimOP) %>%
+  mutate(val = as.numeric(val))
+
+demo_data <- demo_data %>%
+  group_by(filingstatus3, var) %>%
+  summarise(mean = mean(val, na.rm = TRUE))
+```
+
+```{r}
+# prep income data
+
+income <- all_data
+
+income$filingstatus3[income$filingstatus3 == "Spouse filed, client does not want divorce" | income$filingstatus3 == "Spouse filed, client wants divorce"] <- "Spouse filed"
+income$filingstatus3[income$filingstatus3 == "Nothing filed, client wants divorce"] <- "Nothing filed"
+
+income$MedInsPrimHold[income$MedInsPrimHold == "Client"] <- 1
+income$MedInsPrimHold[income$MedInsPrimHold != "Client"] <- 0
+
+income <- income %>%
+  select(filingstatus3, IsEmplCl, IsEmplOP, MonthWageCl, AmtMnthIncOP, IsFdStmpCl, IsSSIOrSSDICl, IsTANFCl, IsOthIncCl, IsPensSoleCl, IsPensSoleOP, IsMedInsCl, MedInsPrimHold) %>%
+  gather(key = "var", value = "val", IsEmplCl, IsEmplOP, MonthWageCl, AmtMnthIncOP, IsFdStmpCl, IsSSIOrSSDICl, IsTANFCl, IsOthIncCl, IsPensSoleCl, IsPensSoleOP, IsMedInsCl, MedInsPrimHold) %>%
+  mutate(val = as.numeric(val)) %>%
+  group_by(filingstatus3, var) %>%
+  summarise(mean = mean(val, na.rm = TRUE))
+```
+
+```{r}
+# prep asset data
+asset <- all_data %>%
+  mutate(ClOwnREH = 0, OwnREH = 0, DesREH = 0, OwnAuto = 0, ClOwnAuto = 0, DesAuto = 0, OwnPenAnn = 0, DesPenAnn = 0, OwnBkAcct = 0, OwnBus = 0, OwnCC = 0, OwnLoan = 0)
+
+asset$filingstatus3[asset$filingstatus3 == "Spouse filed, client does not want divorce" | asset$filingstatus3 == "Spouse filed, client wants divorce"] <- "spouse_filed"
+asset$filingstatus3[asset$filingstatus3 == "Nothing filed, client wants divorce"] <- "none_filed"
+
+# client has sole or joint ownership of REH
+
+asset$ClOwnREH[asset$OwnREH1 == "Joint" | asset$OwnREH1 == "Client alone" | asset$OwnREH2 == "Joint" | asset$OwnREH2 == "Client alone" | asset$OwnREH3 == "Joint" | asset$OwnREH3 == "Client alone" | asset$OwnREHOth == "Joint" | asset$OwnREHOth == "Client alone"] <- 1
+
+# client or spouse has REH
+
+asset$OwnREH[asset$IsREH1 == 1] <- 1
+
+# Cl or spouse own auto
+asset$OwnAuto[asset$IsAuto1 == 1] <- 1
+
+# cl has sole or joint own of auto
+asset$ClOwnAuto[asset$OwnAuto1 == "Joint" | asset$OwnAuto1 == "Client alone" | asset$OwnAuto2 == "Joint" | asset$OwnAuto2 == "Client alone" | asset$OwnAuto3 == "Joint" | asset$OwnAuto3 == "Client alone"] <- 1
+
+# client or spouse has pension/annuity
+asset$OwnPenAnn[asset$IsPenAnn1 == 1] <- 1
+
+# client or spouse has bank account
+asset$OwnBkAcct[asset$IsBkAcct1 == 1] <- 1
+
+# client or spouse has business
+asset$OwnBus[asset$num_Bus != 0] <- 1
+
+# client or spouse has credit card
+asset$OwnCC[asset$num_CC != 0] <- 1
+
+# client or spouse has loan
+asset$OwnLoan[asset$num_Loan != 0] <- 1
+
+asset <- asset %>%
+  select(filingstatus3, clownasset, OwnREH, num_REH, ClOwnREH, desshareREH, OwnAuto,num_Auto, ClOwnAuto, desshareAuto, OwnPenAnn, num_PenAnn, clownPenAnn, dessharePenAnn, OwnBkAcct, num_BkAcct, clownBkAcct, desshareBkAcct, OwnBus, num_Bus, clownBus, desshareBus, OwnCC, num_CC, clownCC, desOPCC, OwnLoan, num_Loan, clownLoan, desOPLoan) %>%
+  gather(key = "var", value = "val", clownasset, OwnREH, num_REH, ClOwnREH, desshareREH, OwnAuto, num_Auto, ClOwnAuto, desshareAuto, OwnPenAnn, num_PenAnn, clownPenAnn, dessharePenAnn, OwnBkAcct, num_BkAcct, clownBkAcct, desshareBkAcct, OwnBus, num_Bus, clownBus, desshareBus, OwnCC, num_CC, clownCC, desOPCC, OwnLoan, num_Loan, clownLoan, desOPLoan) %>%
+  mutate(val = as.numeric(val)) %>%
+  group_by(filingstatus3, var) %>%
+  summarise(mean = mean(val, na.rm = TRUE), sd = sd(val, na.rm = TRUE)) %>%
+  unite(mean_sd, mean, sd, sep = "-") %>%
+  spread(filingstatus3, mean_sd) %>%
+  separate(col = none_filed, into = c("none_filed_mean", "none_filed_sd"), sep = "-") %>%
+  separate(col = spouse_filed, into = c("spouse_filed_mean", "spouse_filed_sd"), sep = "-") %>%
+  mutate(spouse_filed_mean = as.numeric(spouse_filed_mean), spouse_filed_sd = as.numeric(spouse_filed_sd), none_filed_mean = as.numeric(none_filed_mean), none_filed_sd = as.numeric(none_filed_sd)) %>%
+  group_by(var) %>%
+  mutate(meandiff = spouse_filed_mean - none_filed_mean) %>%
+  mutate(se = sqrt((spouse_filed_sd^2 / 67) + (none_filed_sd^2 / 310)))
+  # mutate(var = as.factor(var)) %>%
+  # mutate(var = fct_relevel(var, c("clownasset", "OwnREH", "num_REH", "ClOwnREH", "desshareREH", "OwnAuto", "num_Auto", "ClOwnAuto", "desshareAuto", "OwnPenAnn", "num_PenAnn", "clownPenAnn", "dessharePenAnn", "OwnBkAcct", "num_BkAcct", "clownBkAcct", "desshareBkAcct", "OwnBus", "num_Bus", "clownBus", "desshareBus", "OwnCC", "num_CC", "clownCC", "desOPCC", "OwnLoan", "num_Loan", "clownLoan", "desOPLoan"))) %>%
+  # group_by(var)
+
+
 ```
 

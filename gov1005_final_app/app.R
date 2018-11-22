@@ -10,6 +10,11 @@ ui <- fluidPage(theme = shinytheme("yeti"),
   titlePanel("Access to Justice Lab - Philadelphia Divorce Study"),
   
   tabsetPanel(
+    tabPanel("Summary",
+             mainPanel(
+               dataTableOutput("mainTable")
+             )
+    ),
     tabPanel("Demographics", 
              sidebarLayout(
                sidebarPanel(width = 3, sliderInput("ageBins",
@@ -71,51 +76,56 @@ ui <- fluidPage(theme = shinytheme("yeti"),
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-   
-   # wage of client
-   output$wagePlotCl <- renderPlot({
-      # generate bins based on input$bins from ui.R
-      x    <- wage_data$MonthWageCl.x
-      bins <- seq(0, max(x), length.out = input$wageBins + 1)
+  
+  output$mainTable <- renderDataTable({
+    as.data.frame(table_data)
+  })
+  
+  # wage of client
+  output$wagePlotCl <- renderPlot({
+    # generate bins based on input$bins from ui.R
+    x    <- wage_data$MonthWageCl.x
+    bins <- seq(0, max(x), length.out = input$wageBins + 1)
       
-      # draw the histogram with the specified number of bins
-      hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Participant Wages", xlab = "Wages")
-   })
+    # draw the histogram with the specified number of bins
+    hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Participant Wages", xlab = "Wages")
+  })
    
-   # wage of opposing party
-   output$wagePlotOP <- renderPlot({
-     # generate bins based on input$bins from ui.R
-     x    <- wage_data$AmtMnthIncOP.x
-     bins <- seq(0, max(x), length.out = input$wageBins + 1)
+  # wage of opposing party
+  output$wagePlotOP <- renderPlot({
+    # generate bins based on input$bins from ui.R
+    x    <- wage_data$AmtMnthIncOP.x
+    bins <- seq(0, max(x), length.out = input$wageBins + 1)
      
-     # draw the histogram with the specified number of bins
-     hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Opposition Party Wages", xlab = "Wages")
-   })
+    # draw the histogram with the specified number of bins
+    hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Opposition Party Wages", xlab = "Wages")
+  })
    
-   # race histogram
-   output$raceTable = renderDT({
-     datatable(race_data, options = list(bPaginate = FALSE, bFilter = FALSE, bInfo = FALSE))
-   })
+  # race histogram
+  output$raceTable = renderDT({
+    datatable(race_data, options = list(bPaginate = FALSE, bFilter = FALSE, bInfo = FALSE))
+  })
    
-   # age histogram
-   output$agePlot <- renderPlot({
-     # generate bins based on input$bins from ui.R
-     x    <- combo$age.x
-     bins <- seq(0, max(x), length.out = input$ageBins + 1)
+  # age histogram
+  output$agePlot <- renderPlot({
+    # generate bins based on input$bins from ui.R
+    x    <- combo$age.x
+    bins <- seq(0, max(x), length.out = input$ageBins + 1)
      
-     # draw the histogram with the specified number of bins
-     hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Participant Age", xlab = "Age")
-   })
+    # draw the histogram with the specified number of bins
+    hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Participant Age", xlab = "Age")
+  })
    
-   # marriage histogram
-   output$marrPlot = renderPlot({
-     # generate bins based on input$bins from ui.R
-     x    <- marr_data$lengthmar.x
-     bins <- seq(0, max(x), length.out = input$marrBins + 1)
+  # marriage histogram
+  output$marrPlot = renderPlot({
+    # generate bins based on input$bins from ui.R
+    x    <- marr_data$lengthmar.x
+    bins <- seq(0, max(x), length.out = input$marrBins + 1)
      
-     # draw the histogram with the specified number of bins
-     hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Marriage Length", xlab = "Marriage Length in Years")
-   })
+    # draw the histogram with the specified number of bins
+    hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Marriage Length", xlab = "Marriage Length in Years")
+  })
+  
 }
 
 # Run the application 

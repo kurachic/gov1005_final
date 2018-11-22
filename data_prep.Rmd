@@ -67,8 +67,8 @@ demo_data$IsMentPhysOp[demo_data$IsMentOP == 1 | demo_data$IsPhysOP == 1] <- 1
 demo_data$IsAlcoSubsCl[demo_data$IsAlcoCl == 1 | demo_data$IsSubsCl == 1] <- 1
 demo_data$IsAlcoSubsOp[demo_data$IsAlcoOP == 1 | demo_data$IsSubsOP == 1] <- 1
 
-demo_data$filingstatus3[demo_data$filingstatus3 == "Spouse filed, client does not want divorce" | demo_data$filingstatus3 == "Spouse filed, client wants divorce"] <- "Spouse filed"
-demo_data$filingstatus3[demo_data$filingstatus3 == "Nothing filed, client wants divorce"] <- "Nothing filed"
+demo_data$filingstatus3[demo_data$filingstatus3 == "Spouse filed, client does not want divorce" | demo_data$filingstatus3 == "Spouse filed, client wants divorce"] <- "spouse_filed"
+demo_data$filingstatus3[demo_data$filingstatus3 == "Nothing filed, client wants divorce"] <- "none_filed"
 
 demo_data$LangHH[demo_data$LangHH != "English"] <- 0
 demo_data$LangHH[demo_data$LangHH == "English"] <- 1
@@ -79,10 +79,6 @@ demo_data <- demo_data %>%
          IsAlcoSubsCl, IsAlcoSubsOp, IsCrimCl, IsCrimOP) %>%
   gather(key = "var", value = "val", IsFemCl, age, IsBlaCl, IsHisCl, IsWhiCl, IsOthAsiCl, LangHH, IsMentPhysCl, IsMentPhysOp, IsAlcoSubsCl, IsAlcoSubsOp, IsCrimCl, IsCrimOP) %>%
   mutate(val = as.numeric(val))
-
-demo_data <- demo_data %>%
-  group_by(filingstatus3, var) %>%
-  summarise(mean = mean(val, na.rm = TRUE))
 ```
 
 ```{r}
@@ -90,8 +86,8 @@ demo_data <- demo_data %>%
 
 income <- all_data
 
-income$filingstatus3[income$filingstatus3 == "Spouse filed, client does not want divorce" | income$filingstatus3 == "Spouse filed, client wants divorce"] <- "Spouse filed"
-income$filingstatus3[income$filingstatus3 == "Nothing filed, client wants divorce"] <- "Nothing filed"
+income$filingstatus3[income$filingstatus3 == "Spouse filed, client does not want divorce" | income$filingstatus3 == "Spouse filed, client wants divorce"] <- "spouse_filed"
+income$filingstatus3[income$filingstatus3 == "Nothing filed, client wants divorce"] <- "none_filed"
 
 income$MedInsPrimHold[income$MedInsPrimHold == "Client"] <- 1
 income$MedInsPrimHold[income$MedInsPrimHold != "Client"] <- 0
@@ -99,9 +95,35 @@ income$MedInsPrimHold[income$MedInsPrimHold != "Client"] <- 0
 income <- income %>%
   select(filingstatus3, IsEmplCl, IsEmplOP, MonthWageCl, AmtMnthIncOP, IsFdStmpCl, IsSSIOrSSDICl, IsTANFCl, IsOthIncCl, IsPensSoleCl, IsPensSoleOP, IsMedInsCl, MedInsPrimHold) %>%
   gather(key = "var", value = "val", IsEmplCl, IsEmplOP, MonthWageCl, AmtMnthIncOP, IsFdStmpCl, IsSSIOrSSDICl, IsTANFCl, IsOthIncCl, IsPensSoleCl, IsPensSoleOP, IsMedInsCl, MedInsPrimHold) %>%
-  mutate(val = as.numeric(val)) %>%
-  group_by(filingstatus3, var) %>%
-  summarise(mean = mean(val, na.rm = TRUE))
+  mutate(val = as.numeric(val))
+```
+
+```{r}
+# prep marraige data
+
+marr <- all_data
+
+marr$filingstatus3[marr$filingstatus3 == "Spouse filed, client does not want divorce" | marr$filingstatus3 == "Spouse filed, client wants divorce"] <- "spouse_filed"
+marr$filingstatus3[marr$filingstatus3 == "Nothing filed, client wants divorce"] <- "none_filed"
+
+marr <- marr %>%
+  select(filingstatus3, lengthmar, IsOPInClHm, prevdiv, IsBenSpSupPhCnty, IsPaySpSupPhCnty, IsClWntSpSup, IsOPEconCla, IsPFAAgstCl, IsPFAProtCl, IsPFAAgstOP, IsGrndDiv2Yr, IsGrndDivMutCon, IsGrndDivDese, IsGrnDivInd, IsGrnDivOth) %>%
+  gather(key = "var", value = "val", lengthmar, IsOPInClHm, prevdiv, IsBenSpSupPhCnty, IsPaySpSupPhCnty, IsClWntSpSup, IsOPEconCla, IsPFAAgstCl, IsPFAProtCl, IsPFAAgstOP, IsGrndDiv2Yr, IsGrndDivMutCon, IsGrndDivDese, IsGrnDivInd, IsGrnDivOth) %>%
+  mutate(val = as.numeric(val)) 
+```
+
+```{r}
+# prep fam data
+
+fam <- all_data
+
+fam$filingstatus3[fam$filingstatus3 == "Spouse filed, client does not want divorce" | fam$filingstatus3 == "Spouse filed, client wants divorce"] <- "spouse_filed"
+fam$filingstatus3[fam$filingstatus3 == "Nothing filed, client wants divorce"] <- "none_filed"
+
+fam <- fam %>%
+  select(filingstatus3, num_chld, chldmar, chldmar18, chldmar18cust, chldmar18supp) %>%
+  gather(key = "var", value = "val", num_chld, chldmar, chldmar18, chldmar18cust, chldmar18supp) %>%
+  mutate(val = as.numeric(val)) 
 ```
 
 ```{r}
@@ -144,17 +166,27 @@ asset$OwnLoan[asset$num_Loan != 0] <- 1
 asset <- asset %>%
   select(filingstatus3, clownasset, OwnREH, num_REH, ClOwnREH, desshareREH, OwnAuto,num_Auto, ClOwnAuto, desshareAuto, OwnPenAnn, num_PenAnn, clownPenAnn, dessharePenAnn, OwnBkAcct, num_BkAcct, clownBkAcct, desshareBkAcct, OwnBus, num_Bus, clownBus, desshareBus, OwnCC, num_CC, clownCC, desOPCC, OwnLoan, num_Loan, clownLoan, desOPLoan) %>%
   gather(key = "var", value = "val", clownasset, OwnREH, num_REH, ClOwnREH, desshareREH, OwnAuto, num_Auto, ClOwnAuto, desshareAuto, OwnPenAnn, num_PenAnn, clownPenAnn, dessharePenAnn, OwnBkAcct, num_BkAcct, clownBkAcct, desshareBkAcct, OwnBus, num_Bus, clownBus, desshareBus, OwnCC, num_CC, clownCC, desOPCC, OwnLoan, num_Loan, clownLoan, desOPLoan) %>%
-  mutate(val = as.numeric(val), p_val = 0) 
+  mutate(val = as.numeric(val)) 
 
-var_names <- list("clownasset", "OwnREH", "num_REH", "ClOwnREH", "desshareREH", "OwnAuto", "num_Auto", "ClOwnAuto", "desshareAuto", "OwnPenAnn", "num_PenAnn", "clownPenAnn", "dessharePenAnn", "OwnBkAcct", "num_BkAcct", "clownBkAcct", "desshareBkAcct", "OwnBus", "num_Bus", "clownBus", "desshareBus", "OwnCC", "num_CC", "clownCC", "desOPCC", "OwnLoan", "num_Loan", "clownLoan", "desOPLoan")
+# combine tables
+
+table_data <- asset %>%
+  merge(income, all = TRUE) %>%
+  merge(demo_data, all = TRUE) %>%
+  merge(marr, all = TRUE) %>%
+  merge(fam, all = TRUE) %>%
+  mutate(p_val = 0)
+
+var_names <- unique(table_data$var)
 
 i <- 1
 
 for(i in 1:length(var_names)) {
-  asset$p_val[asset$var == var_names[i]] <- t.test(asset$val[asset$var == var_names[i]] ~ asset$filingstatus3[asset$var == var_names[i]], conf.level = 0.95)$p.value
+  table_data$p_val[table_data$var == var_names[i]] <- t.test(table_data$val[table_data$var == var_names[i]] ~ table_data$filingstatus3[table_data$var == var_names[i]], conf.level = 0.95)$p.value
 }
 
-asset<-asset %>%
+# get p values and stuff
+table_data<-table_data %>%
   group_by(filingstatus3, var) %>%
   summarise(mean = mean(val, na.rm = TRUE), sd = sd(val, na.rm = TRUE), p_val = mean(p_val)) %>%
   unite(mean_sd, mean, sd) %>%
@@ -167,12 +199,12 @@ asset<-asset %>%
   unite(spouse_filed, s_mean, s_sd) %>%
   gather(key = "filing_status", "value" = mean_sd, none_filed, spouse_filed) %>%
   separate(mean_sd, c("mean", "sd"), sep = "_") %>%
-  select(var, filing_status, mean, mean_diff, p_val)
-
-
-  # mutate(var = as.factor(var)) %>%
-  # mutate(var = fct_relevel(var, c("clownasset", "OwnREH", "num_REH", "ClOwnREH", "desshareREH", "OwnAuto", "num_Auto", "ClOwnAuto", "desshareAuto", "OwnPenAnn", "num_PenAnn", "clownPenAnn", "dessharePenAnn", "OwnBkAcct", "num_BkAcct", "clownBkAcct", "desshareBkAcct", "OwnBus", "num_Bus", "clownBus", "desshareBus", "OwnCC", "num_CC", "clownCC", "desOPCC", "OwnLoan", "num_Loan", "clownLoan", "desOPLoan"))) %>%
-  # group_by(var)
+  select(var, filing_status, mean, mean_diff, p_val) %>%
+  spread(filing_status, mean) %>%
+  select(var, none_filed, spouse_filed, mean_diff, p_val) %>%
+  ungroup() %>%
+  mutate(var = as.factor(var)) %>%
+  mutate(var = fct_relevel(var, c("IsFemCl", "age", "IsBlaCl", "IsHisCl", "IsWhiCl", "IsOthAsiCl", "LangHH", "IsMentPhysCl", "IsMentPhysOp", "IsAlcoSubsCl", "IsAlcoSubsOp", "IsCrimCl", "IsCrimOP", "IsEmplCl", "IsEmplOP", "MonthWageCl", "AmtMnthIncOP", "IsFdStmpCl", "IsSSIOrSSDICl", "IsTANFCl", "IsOthIncCl", "IsPensSoleCl", "IsPensSoleOP", "IsMedInsCl", "MedInsPrimHold", "clownasset", "OwnREH", "num_REH", "ClOwnREH", "desshareREH", "OwnAuto","num_Auto", "ClOwnAuto", "desshareAuto", "OwnPenAnn", "num_PenAnn", "clownPenAnn", "dessharePenAnn", "OwnBkAcct", "num_BkAcct", "clownBkAcct", "desshareBkAcct", "OwnBus", "num_Bus", "clownBus", "desshareBus", "OwnCC", "num_CC", "clownCC", "desOPCC", "OwnLoan", "num_Loan", "clownLoan", "desOPLoan", "lengthmar", "IsOPInClHm", "prevdiv", "IsBenSpSupPhCnty", "IsPaySpSupPhCnty", "IsClWntSpSup", "IsOPEconCla", "IsPFAAgstCl", "IsPFAProtCl", "IsPFAAgstOP", "IsGrndDiv2Yr", "IsGrndDivMutCon", "IsGrndDivDese", "IsGrnDivInd", "IsGrnDivOth", "num_chld", "chldmar", "chldmar18", "chldmar18cust", "chldmar18supp")))
 
 
 ```

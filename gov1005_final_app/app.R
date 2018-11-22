@@ -109,7 +109,7 @@ server <- function(input, output) {
   # age histogram
   output$agePlot <- renderPlot({
     # generate bins based on input$bins from ui.R
-    x    <- combo$age.x
+    x    <- combo_included$age.x
     bins <- seq(0, max(x), length.out = input$ageBins + 1)
      
     # draw the histogram with the specified number of bins

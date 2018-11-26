@@ -1,8 +1,10 @@
 library(shiny)
 library(shinythemes)
 library(DT)
+library(knitr)
+library(kableExtra)
 
-load("Data/my_work_space.RData")
+load("Data/workspace.RData")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(theme = shinytheme("yeti"),
@@ -12,7 +14,7 @@ ui <- fluidPage(theme = shinytheme("yeti"),
   tabsetPanel(
     tabPanel("Summary",
              mainPanel(
-               dataTableOutput("mainTable")
+               tableOutput("mainTable")
              )
     ),
     tabPanel("Demographics", 
@@ -54,6 +56,11 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                )
              )
     ),
+    tabPanel("Assets",
+      mainPanel(
+        h2("Assets")
+      )
+    ),
     tabPanel("Marriage",
              sidebarLayout(
                sidebarPanel(width = 3, sliderInput("marrBins",
@@ -70,23 +77,26 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                h2("Domestic Abuse")
              )
       )
+    ),
+    tabPanel("Children",
+      mainPanel("Children")
     )
   )
 )
 
-# Define server logic required to draw a histogram
+# Define server logic
 server <- function(input, output) {
   
-  output$mainTable <- renderDataTable({
-    as.data.frame(table_data)
-  })
+  output$mainTable <- renderTable({
+    table_data
+    })
   
   # wage of client
   output$wagePlotCl <- renderPlot({
     # generate bins based on input$bins from ui.R
     x    <- wage_data$MonthWageCl.x
     bins <- seq(0, max(x), length.out = input$wageBins + 1)
-      
+    # nb - try doing geom hist to see if it looks nicer
     # draw the histogram with the specified number of bins
     hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Participant Wages", xlab = "Wages")
   })
@@ -96,7 +106,7 @@ server <- function(input, output) {
     # generate bins based on input$bins from ui.R
     x    <- wage_data$AmtMnthIncOP.x
     bins <- seq(0, max(x), length.out = input$wageBins + 1)
-     
+    # nb - remove 20000 income from op graph and change scales to match
     # draw the histogram with the specified number of bins
     hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Opposition Party Wages", xlab = "Wages")
   })

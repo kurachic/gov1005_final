@@ -3,6 +3,7 @@ library(shinythemes)
 library(DT)
 library(knitr)
 library(kableExtra)
+library(htmlTable)
 
 load("Data/workspace.RData")
 
@@ -88,8 +89,9 @@ ui <- fluidPage(theme = shinytheme("yeti"),
 server <- function(input, output) {
   
   output$mainTable <- renderTable({
-    table_data
-    })
+    table <- table_data
+    htmlTable(table, align = "l")
+    }, sanitize.text.function = function(x) x)
   
   # wage of client
   output$wagePlotCl <- renderPlot({

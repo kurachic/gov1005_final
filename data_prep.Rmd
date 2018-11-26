@@ -78,7 +78,8 @@ demo_data <- demo_data %>%
          IsOthAsiCl, LangHH, IsMentPhysCl, IsMentPhysOp,
          IsAlcoSubsCl, IsAlcoSubsOp, IsCrimCl, IsCrimOP) %>%
   gather(key = "var", value = "val", IsFemCl, age, IsBlaCl, IsHisCl, IsWhiCl, IsOthAsiCl, LangHH, IsMentPhysCl, IsMentPhysOp, IsAlcoSubsCl, IsAlcoSubsOp, IsCrimCl, IsCrimOP) %>%
-  mutate(val = as.numeric(val))
+  mutate(val = as.numeric(val)) %>%
+  mutate(type = "demo")
 ```
 
 ```{r}
@@ -95,7 +96,8 @@ income$MedInsPrimHold[income$MedInsPrimHold != "Client"] <- 0
 income <- income %>%
   select(filingstatus3, IsEmplCl, IsEmplOP, MonthWageCl, AmtMnthIncOP, IsFdStmpCl, IsSSIOrSSDICl, IsTANFCl, IsOthIncCl, IsPensSoleCl, IsPensSoleOP, IsMedInsCl, MedInsPrimHold) %>%
   gather(key = "var", value = "val", IsEmplCl, IsEmplOP, MonthWageCl, AmtMnthIncOP, IsFdStmpCl, IsSSIOrSSDICl, IsTANFCl, IsOthIncCl, IsPensSoleCl, IsPensSoleOP, IsMedInsCl, MedInsPrimHold) %>%
-  mutate(val = as.numeric(val))
+  mutate(val = as.numeric(val)) %>%
+  mutate(type = "Income")
 ```
 
 ```{r}
@@ -109,7 +111,8 @@ marr$filingstatus3[marr$filingstatus3 == "Nothing filed, client wants divorce"] 
 marr <- marr %>%
   select(filingstatus3, lengthmar, IsOPInClHm, prevdiv, IsBenSpSupPhCnty, IsPaySpSupPhCnty, IsClWntSpSup, IsOPEconCla, IsPFAAgstCl, IsPFAProtCl, IsPFAAgstOP, IsGrndDiv2Yr, IsGrndDivMutCon, IsGrndDivDese, IsGrnDivInd, IsGrnDivOth) %>%
   gather(key = "var", value = "val", lengthmar, IsOPInClHm, prevdiv, IsBenSpSupPhCnty, IsPaySpSupPhCnty, IsClWntSpSup, IsOPEconCla, IsPFAAgstCl, IsPFAProtCl, IsPFAAgstOP, IsGrndDiv2Yr, IsGrndDivMutCon, IsGrndDivDese, IsGrnDivInd, IsGrnDivOth) %>%
-  mutate(val = as.numeric(val)) 
+  mutate(val = as.numeric(val)) %>%
+  mutate(type = "Marr")
 ```
 
 ```{r}
@@ -123,7 +126,8 @@ fam$filingstatus3[fam$filingstatus3 == "Nothing filed, client wants divorce"] <-
 fam <- fam %>%
   select(filingstatus3, num_chld, chldmar, chldmar18, chldmar18cust, chldmar18supp) %>%
   gather(key = "var", value = "val", num_chld, chldmar, chldmar18, chldmar18cust, chldmar18supp) %>%
-  mutate(val = as.numeric(val)) 
+  mutate(val = as.numeric(val)) %>%
+  mutate(type = "fam")
 ```
 
 ```{r}
@@ -166,7 +170,8 @@ asset$OwnLoan[asset$num_Loan != 0] <- 1
 asset <- asset %>%
   select(filingstatus3, clownasset, OwnREH, num_REH, ClOwnREH, desshareREH, OwnAuto,num_Auto, ClOwnAuto, desshareAuto, OwnPenAnn, num_PenAnn, clownPenAnn, dessharePenAnn, OwnBkAcct, num_BkAcct, clownBkAcct, desshareBkAcct, OwnBus, num_Bus, clownBus, desshareBus, OwnCC, num_CC, clownCC, desOPCC, OwnLoan, num_Loan, clownLoan, desOPLoan) %>%
   gather(key = "var", value = "val", clownasset, OwnREH, num_REH, ClOwnREH, desshareREH, OwnAuto, num_Auto, ClOwnAuto, desshareAuto, OwnPenAnn, num_PenAnn, clownPenAnn, dessharePenAnn, OwnBkAcct, num_BkAcct, clownBkAcct, desshareBkAcct, OwnBus, num_Bus, clownBus, desshareBus, OwnCC, num_CC, clownCC, desOPCC, OwnLoan, num_Loan, clownLoan, desOPLoan) %>%
-  mutate(val = as.numeric(val)) 
+  mutate(val = as.numeric(val)) %>%
+  mutate(type = "Asset")
 
 # combine tables
 
@@ -187,8 +192,8 @@ for(i in 1:length(var_names)) {
 
 # get p values and stuff
 table_data<-table_data %>%
-  group_by(filingstatus3, var) %>%
-  summarise(mean = mean(val, na.rm = TRUE), sd = sd(val, na.rm = TRUE), p_val = mean(p_val)) %>%
+  group_by(filingstatus3, var, p_val, type) %>%
+  summarise(mean = mean(val, na.rm = TRUE), sd = sd(val, na.rm = TRUE)) %>%
   unite(mean_sd, mean, sd) %>%
   spread(filingstatus3, mean_sd) %>%
   separate(none_filed, into = c("nf_mean", "nf_sd"), sep = "_") %>%
@@ -199,15 +204,13 @@ table_data<-table_data %>%
   unite(spouse_filed, s_mean, s_sd) %>%
   gather(key = "filing_status", "value" = mean_sd, none_filed, spouse_filed) %>%
   separate(mean_sd, c("mean", "sd"), sep = "_") %>%
-  select(var, filing_status, mean, mean_diff, p_val) %>%
+  select(var, filing_status, mean, mean_diff, p_val, type) %>%
   spread(filing_status, mean) %>%
-  select(var, none_filed, spouse_filed, mean_diff, p_val) %>%
+  select(var, none_filed, spouse_filed, mean_diff, p_val, type) %>%
   ungroup() %>%
   mutate(var = as.factor(var)) %>%
   mutate(var = fct_relevel(var, c("IsFemCl", "age", "IsBlaCl", "IsHisCl", "IsWhiCl", "IsOthAsiCl", "LangHH", "IsMentPhysCl", "IsMentPhysOp","IsAlcoSubsCl", "IsAlcoSubsOp", "IsCrimCl", "IsCrimOP", "IsEmplCl", "IsEmplOP", "MonthWageCl", "AmtMnthIncOP", "IsFdStmpCl", "IsSSIOrSSDICl", "IsTANFCl", "IsOthIncCl", "IsPensSoleCl", "IsPensSoleOP", "IsMedInsCl", "MedInsPrimHold", "clownasset", "OwnREH", "num_REH", "ClOwnREH", "desshareREH", "OwnAuto","num_Auto", "ClOwnAuto", "desshareAuto", "OwnPenAnn", "num_PenAnn", "clownPenAnn", "dessharePenAnn", "OwnBkAcct", "num_BkAcct", "clownBkAcct", "desshareBkAcct", "OwnBus", "num_Bus", "clownBus", "desshareBus", "OwnCC", "num_CC", "clownCC", "desOPCC", "OwnLoan", "num_Loan", "clownLoan", "desOPLoan", "lengthmar", "IsOPInClHm", "prevdiv", "IsBenSpSupPhCnty", "IsPaySpSupPhCnty", "IsClWntSpSup", "IsOPEconCla", "IsPFAAgstCl", "IsPFAProtCl", "IsPFAAgstOP", "IsGrndDiv2Yr", "IsGrndDivMutCon", "IsGrndDivDese", "IsGrnDivInd", "IsGrnDivOth", "num_chld", "chldmar", "chldmar18", "chldmar18cust", "chldmar18supp"))) %>%
   arrange(var)
-
-
 
 ```
 

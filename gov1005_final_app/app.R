@@ -19,6 +19,11 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                tableOutput("mainTable")
              )
     ),
+    # tabPanel("Summary",
+    #          mainPanel(
+    #            htmlOutput("mainTable")
+    #          )
+    # ),
     tabPanel("Demographics", 
              sidebarLayout(
                sidebarPanel(width = 3, sliderInput("ageBins",
@@ -89,14 +94,18 @@ ui <- fluidPage(theme = shinytheme("yeti"),
 # Define server logic
 server <- function(input, output) {
   
+  # output$mainTable <- renderUI({
+  #   kable(table_data)
+  # }, sanitize.text.function = function(x) x)
+  # 
   output$mainTable <- renderTable({
-    htmlTable(table_data,format = "html", 
+    htmlTable(table2,
               header = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value"),
               rgroup = (c("Demographic", "Income", "Assets", "Marriage", "Family")),
               n.rgroup = (c(13, 12, 30, 14, 5))
               )
     }, sanitize.text.function = function(x) x)
-  
+
   # wage of client
   output$wagePlotCl <- renderPlot({
     # generate bins based on input$bins from ui.R

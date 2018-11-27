@@ -4,6 +4,7 @@ library(DT)
 library(knitr)
 library(kableExtra)
 library(htmlTable)
+library(xtable)
 
 load("Data/workspace.RData")
 
@@ -89,8 +90,11 @@ ui <- fluidPage(theme = shinytheme("yeti"),
 server <- function(input, output) {
   
   output$mainTable <- renderTable({
-    table <- table_data
-    htmlTable(table, align = "l")
+    htmlTable(table_data,format = "html", 
+              header = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value"),
+              rgroup = (c("Demographic", "Income", "Assets", "Marriage", "Family")),
+              n.rgroup = (c(13, 12, 30, 14, 5))
+              )
     }, sanitize.text.function = function(x) x)
   
   # wage of client

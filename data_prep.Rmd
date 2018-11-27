@@ -206,11 +206,15 @@ table_data<-table_data %>%
   separate(mean_sd, c("mean", "sd"), sep = "_") %>%
   select(var, filing_status, mean, mean_diff, p_val, type) %>%
   spread(filing_status, mean) %>%
-  select(var, none_filed, spouse_filed, mean_diff, p_val, type) %>%
+  select(var, none_filed, spouse_filed, mean_diff, p_val) %>%
   ungroup() %>%
   mutate(var = as.factor(var)) %>%
   mutate(var = fct_relevel(var, c("IsFemCl", "age", "IsBlaCl", "IsHisCl", "IsWhiCl", "IsOthAsiCl", "LangHH", "IsMentPhysCl", "IsMentPhysOp","IsAlcoSubsCl", "IsAlcoSubsOp", "IsCrimCl", "IsCrimOP", "IsEmplCl", "IsEmplOP", "MonthWageCl", "AmtMnthIncOP", "IsFdStmpCl", "IsSSIOrSSDICl", "IsTANFCl", "IsOthIncCl", "IsPensSoleCl", "IsPensSoleOP", "IsMedInsCl", "MedInsPrimHold", "clownasset", "OwnREH", "num_REH", "ClOwnREH", "desshareREH", "OwnAuto","num_Auto", "ClOwnAuto", "desshareAuto", "OwnPenAnn", "num_PenAnn", "clownPenAnn", "dessharePenAnn", "OwnBkAcct", "num_BkAcct", "clownBkAcct", "desshareBkAcct", "OwnBus", "num_Bus", "clownBus", "desshareBus", "OwnCC", "num_CC", "clownCC", "desOPCC", "OwnLoan", "num_Loan", "clownLoan", "desOPLoan", "lengthmar", "IsOPInClHm", "prevdiv", "IsBenSpSupPhCnty", "IsPaySpSupPhCnty", "IsClWntSpSup", "IsOPEconCla", "IsPFAAgstCl", "IsPFAProtCl", "IsPFAAgstOP", "IsGrndDiv2Yr", "IsGrndDivMutCon", "IsGrndDivDese", "IsGrnDivInd", "IsGrnDivOth", "num_chld", "chldmar", "chldmar18", "chldmar18cust", "chldmar18supp"))) %>%
   arrange(var)
+
+```
+
+```{r}
 
 ```
 

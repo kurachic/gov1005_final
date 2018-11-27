@@ -86,8 +86,7 @@ ui <- fluidPage(theme = shinytheme("yeti"),
              mainPanel(
                h2("Marriage Length"),
                h5("Below is a histogram of the length of the participants' marriages in years."),
-               plotOutput("marrPlot"),
-               h2("Domestic Abuse")
+               plotOutput("marrPlot")
              )
       )
     ),
@@ -128,8 +127,8 @@ server <- function(input, output) {
   # wage of client
   output$wagePlotCl <- renderPlot({
     # generate bins based on input$bins from ui.R
-    x    <- wage_data$MonthWageCl.x
-    bins <- seq(0, max(x), length.out = input$wageBins + 1)
+    x    <- wage_data$MonthWageCl
+    bins <- seq(0, 7000, length.out = input$wageBins + 1)
     # nb - try doing geom hist to see if it looks nicer
     # draw the histogram with the specified number of bins
     hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Participant Wages", xlab = "Wages")
@@ -138,8 +137,8 @@ server <- function(input, output) {
   # wage of opposing party
   output$wagePlotOP <- renderPlot({
     # generate bins based on input$bins from ui.R
-    x    <- wage_data$AmtMnthIncOP.x
-    bins <- seq(0, max(x), length.out = input$wageBins + 1)
+    x    <- wage_data$AmtMnthIncOP
+    bins <- seq(0, 7000, length.out = input$wageBins + 1)
     # nb - remove 20000 income from op graph and change scales to match
     # draw the histogram with the specified number of bins
     hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Opposition Party Wages", xlab = "Wages")
@@ -153,8 +152,8 @@ server <- function(input, output) {
   # age histogram
   output$agePlot <- renderPlot({
     # generate bins based on input$bins from ui.R
-    x    <- combo_included$age.x
-    bins <- seq(0, max(x), length.out = input$ageBins + 1)
+    x    <- as.numeric(all_data$age)
+    bins <- seq(0, max(x, na.rm = TRUE), length.out = input$ageBins + 1)
      
     # draw the histogram with the specified number of bins
     hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Participant Age", xlab = "Age")
@@ -163,7 +162,7 @@ server <- function(input, output) {
   # marriage histogram
   output$marrPlot = renderPlot({
     # generate bins based on input$bins from ui.R
-    x    <- marr_data$lengthmar.x
+    x    <- marr_data$lengthmar
     bins <- seq(0, max(x), length.out = input$marrBins + 1)
      
     # draw the histogram with the specified number of bins

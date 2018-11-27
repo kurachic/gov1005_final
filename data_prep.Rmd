@@ -17,43 +17,36 @@ library(knitr)
 ```{r message = FALSE}
 # random stuff 
 
-included_only <- read_csv("gov1005_final_app/Data/SelectCovariates_13 Oct 2016.csv")
-
 all_data <- read_csv("gov1005_final_app/Data/philly_vars.csv")
 
-labels <- read_excel("gov1005_final_app/Data/Covariate_labels.xlsx")
+wage_data <- all_data %>%
+  filter(!is.na(MonthWageCl), MonthWageCl != 0, !is.na(AmtMnthIncOP), AmtMnthIncOP != 0, AmtMnthIncOP <= 15000) 
 
-combo_included <- included_only %>%
-  left_join(all_data, by = "RefNum")
+number_zero_cl <- all_data %>%
+  select(RefNum, MonthWageCl) %>%
+  filter(MonthWageCl == 0) %>%
+  count(MonthWageCl)
 
-wage_data <- combo_included %>%
-  filter(!is.na(MonthWageCl.x), MonthWageCl.x != 0, !is.na(AmtMnthIncOP.x), AmtMnthIncOP.x != 0)
+number_zero_op <- all_data %>%
+  select(RefNum, AmtMnthIncOP) %>%
+  filter(AmtMnthIncOP == 0) %>%
+  count(AmtMnthIncOP)
 
-number_zero_cl <- combo_included %>%
-  select(RefNum, MonthWageCl.x) %>%
-  filter(MonthWageCl.x == 0) %>%
-  count(MonthWageCl.x)
-
-number_zero_op <- combo_included %>%
-  select(RefNum, AmtMnthIncOP.x) %>%
-  filter(AmtMnthIncOP.x == 0) %>%
-  count(AmtMnthIncOP.x)
-
-marr_data <- combo_included %>%
-  select(lengthmar.x) %>%
-  filter(! is.na(lengthmar.x))
+marr_data <- all_data %>%
+  select(lengthmar) %>%
+  filter(! is.na(lengthmar))
   
-race_data <- combo_included %>%
+race_data <- all_data %>%
   # subtracting 2 from white clients due to 2 people marking both white and hispanic - counting white hispanics as just hispanic
-  summarize(Black = sum((IsBlaCl.y)), White = (sum(IsWhiCl.y) - 2), Hispanic = sum(IsHisCl.y), Asian = sum(IsAsiCl), Other = sum(IsOthCl)) %>%
+  summarize(Black = sum((IsBlaCl)), White = (sum(IsWhiCl) - 2), Hispanic = sum(IsHisCl), Asian = sum(IsAsiCl), Other = sum(IsOthCl)) %>%
   gather(key = "race", "value" = n, Black, White, Hispanic, Asian, Other)
 
-ben_data <- combo_included %>%
-  filter(IsBenSpSupCl.x == 1 | IsTANFCl == 1 | IsSSIOrSSDICl.x == 1 | IsSSCl == 1 | IsOthRetCl == 1 | IsUnempCl == 1 | IsFdStmpCl.x == 1 | IsOthIncCl == 1) %>%
+ben_data <- all_data %>%
+  filter(IsBenSpSupCl == 1 | IsTANFCl == 1 | IsSSIOrSSDICl == 1 | IsSSCl == 1 | IsOthRetCl == 1 | IsUnempCl == 1 | IsFdStmpCl == 1 | IsOthIncCl == 1) %>%
   summarize(n = n())
 
-dom_abuse <- combo_included %>%
-  select(IsPFAAgstCl, DatePFAAgstCl, IsPFAAgstClPhCnty, IsPFAAgstClStillEff, IsPFAProtCl.x, DatePFAProtCl, IsPFAProtClPhCnty, IsPFAProtClStillEff, IsPFAAgstOP.x)
+dom_abuse <- all_data %>%
+  select(IsPFAAgstCl, DatePFAAgstCl, IsPFAAgstClPhCnty, IsPFAAgstClStillEff, IsPFAProtCl, DatePFAProtCl, IsPFAProtClPhCnty, IsPFAProtClStillEff, IsPFAAgstOP)
 ```
 
 ```{r}

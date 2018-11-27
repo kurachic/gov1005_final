@@ -15,9 +15,15 @@ ui <- fluidPage(theme = shinytheme("yeti"),
   
   tabsetPanel(
     tabPanel("Summary",
-             mainPanel(
-               tableOutput("mainTable")
+             sidebarLayout(
+               sidebarPanel(
+                 checkboxInput(inputId = "signif", label = "Significant Differences Only", value = FALSE)
+               ),
+               mainPanel(
+                 tableOutput("mainTable")
+               )
              )
+             
     ),
     # tabPanel("Summary",
     #          mainPanel(
@@ -98,12 +104,25 @@ server <- function(input, output) {
   #   kable(table_data)
   # }, sanitize.text.function = function(x) x)
   # 
+  
   output$mainTable <- renderTable({
-    htmlTable(table_data,
-              header = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value"),
-              rgroup = (c("Demographic", "Income", "Assets", "Marriage", "Family")),
-              n.rgroup = (c(13, 12, 30, 14, 5))
-              )
+      
+    if (input$signif == TRUE) {
+      table_data <- filter(table_data, p_val <= 0.05)
+      htmlTable(table_data,
+                header = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value"),
+                rgroup = (c("Demographic", "Income", "Assets", "Marriage")),
+                n.rgroup = (c(2, 4, 24, 5))
+      )
+    }
+    else {
+      htmlTable(table_data,
+                header = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value"),
+                rgroup = (c("Demographic", "Income", "Assets", "Marriage", "Family")),
+                n.rgroup = (c(13, 12, 30, 14, 5))
+      )
+    }
+    
     }, sanitize.text.function = function(x) x)
   
   # wage of client

@@ -5,10 +5,11 @@ library(knitr)
 library(kableExtra)
 library(htmlTable)
 library(xtable)
+library(janitor)
 
 load("Data/workspace.RData")
 
-# Define UI for application that draws a histogram
+# Define UI for application
 ui <- fluidPage(theme = shinytheme("yeti"),
    
   titlePanel("Access to Justice Lab - Philadelphia Divorce Study"),
@@ -38,11 +39,6 @@ ui <- fluidPage(theme = shinytheme("yeti"),
              )
              
     ),
-    # tabPanel("Summary",
-    #          mainPanel(
-    #            htmlOutput("mainTable")
-    #          )
-    # ),
     tabPanel("Demographics", 
              sidebarLayout(
                sidebarPanel(width = 3, sliderInput("ageBins",
@@ -55,7 +51,7 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                mainPanel(
                  h2("Race"),
                  h5("The percentage of participants belonging to each racial category is displayed below."),
-                 dataTableOutput("raceTable"),
+                 tableOutput("raceTable"),
                  h2("Age"),
                  h5("Below is a histogram of participant's ages."),
                  plotOutput("agePlot")
@@ -139,33 +135,6 @@ server <- function(input, output) {
     }
   }
   
-  # output$mainTable <- renderUI({
-  #   kable(table_data)
-  # }, sanitize.text.function = function(x) x)
-  # 
-  
-  # output$mainTable <- renderTable({
-  #     
-  #   if (input$signif == TRUE) {
-  #     table_data <- filter(table_data, p_val <= 0.05)
-  #     htmlTable(table_data,
-  #               align = "l",
-  #               header = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value"),
-  #               rgroup = (c("Demographic", "Income", "Assets", "Marriage")),
-  #               n.rgroup = (c(2, 4, 24, 5))
-  #     )
-  #   }
-  #   else {
-  #     htmlTable(table_data,
-  #               align = "l",
-  #               header = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value"),
-  #               rgroup = (c("Demographic", "Income", "Assets", "Marriage", "Family")),
-  #               n.rgroup = (c(13, 12, 30, 14, 5))
-  #     )
-  #   }
-  #   
-  #   }, sanitize.text.function = function(x) x)
-  
   # wage of client
   output$wagePlotCl <- renderPlot({
     # generate bins based on input$bins from ui.R
@@ -187,9 +156,11 @@ server <- function(input, output) {
   })
    
   # race histogram
-  output$raceTable = renderDT({
-    datatable(race_data, options = list(bPaginate = FALSE, bFilter = FALSE, bInfo = FALSE))
-  })
+  output$raceTable <- function () {
+    race_data %>%
+      knitr::kable("html", col.names = c("Race", "Percent")) %>%
+      kable_styling("striped", full_width = F)
+  }
    
   # age histogram
   output$agePlot <- renderPlot({

@@ -38,8 +38,11 @@ marr_data <- all_data %>%
   
 race_data <- all_data %>%
   # subtracting 2 from white clients due to 2 people marking both white and hispanic - counting white hispanics as just hispanic
-  summarize(Black = sum((IsBlaCl)), White = (sum(IsWhiCl) - 2), Hispanic = sum(IsHisCl), Asian = sum(IsAsiCl), Other = sum(IsOthCl)) %>%
-  gather(key = "race", "value" = n, Black, White, Hispanic, Asian, Other)
+  mutate(total = sum(IsBlaCl + IsWhiCl + IsHisCl + IsAsiCl + IsOthCl)) %>%
+  summarize(Black = sum((IsBlaCl)), White = (sum(IsWhiCl) - 2), Hispanic = sum(IsHisCl), Asian = sum(IsAsiCl), Other = sum(IsOthCl), total = mean(total)) %>%
+  gather(key = "race", "value" = n, Black, White, Hispanic, Asian, Other) %>%
+  mutate(n = paste0(round((n / total) * 100, digits = 2), "%")) %>%
+  select(race, n)
 
 ben_data <- all_data %>%
   filter(IsBenSpSupCl == 1 | IsTANFCl == 1 | IsSSIOrSSDICl == 1 | IsSSCl == 1 | IsOthRetCl == 1 | IsUnempCl == 1 | IsFdStmpCl == 1 | IsOthIncCl == 1) %>%
@@ -203,6 +206,7 @@ table_data<-table_data %>%
   ungroup() %>%
   mutate(var = as.factor(var)) %>%
   mutate(var = fct_relevel(var, c("IsFemCl", "age", "IsBlaCl", "IsHisCl", "IsWhiCl", "IsOthAsiCl", "LangHH", "IsMentPhysCl", "IsMentPhysOp","IsAlcoSubsCl", "IsAlcoSubsOp", "IsCrimCl", "IsCrimOP", "IsEmplCl", "IsEmplOP", "MonthWageCl", "AmtMnthIncOP", "IsFdStmpCl", "IsSSIOrSSDICl", "IsTANFCl", "IsOthIncCl", "IsPensSoleCl", "IsPensSoleOP", "IsMedInsCl", "MedInsPrimHold", "clownasset", "OwnREH", "num_REH", "ClOwnREH", "desshareREH", "OwnAuto","num_Auto", "ClOwnAuto", "desshareAuto", "OwnPenAnn", "num_PenAnn", "clownPenAnn", "dessharePenAnn", "OwnBkAcct", "num_BkAcct", "clownBkAcct", "desshareBkAcct", "OwnBus", "num_Bus", "clownBus", "desshareBus", "OwnCC", "num_CC", "clownCC", "desOPCC", "OwnLoan", "num_Loan", "clownLoan", "desOPLoan", "lengthmar", "IsOPInClHm", "prevdiv", "IsBenSpSupPhCnty", "IsClWntSpSup", "IsOPEconCla", "IsPFAAgstCl", "IsPFAProtCl", "IsPFAAgstOP", "IsGrndDiv2Yr", "IsGrndDivMutCon", "IsGrndDivDese", "IsGrnDivInd", "IsGrnDivOth", "num_chld", "chldmar", "chldmar18", "chldmar18cust", "chldmar18supp"))) %>%
-  arrange(var)
+  arrange(var) %>%
+  mutate(none_filed = as.numeric(none_filed), spouse_filed = as.numeric(spouse_filed))
 
 ```

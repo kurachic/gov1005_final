@@ -99,13 +99,13 @@ server <- function(input, output) {
   # }, sanitize.text.function = function(x) x)
   # 
   output$mainTable <- renderTable({
-    htmlTable(table2,
+    htmlTable(table_data,
               header = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value"),
               rgroup = (c("Demographic", "Income", "Assets", "Marriage", "Family")),
               n.rgroup = (c(13, 12, 30, 14, 5))
               )
     }, sanitize.text.function = function(x) x)
-
+  
   # wage of client
   output$wagePlotCl <- renderPlot({
     # generate bins based on input$bins from ui.R

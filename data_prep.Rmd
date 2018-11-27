@@ -213,9 +213,3 @@ table_data<-table_data %>%
   arrange(var)
 
 ```
-
-```{r}
-table1 <- as.data.frame(as.matrix(table_data))
-table2 <- as.table(as.matrix(table_data))
-```
-

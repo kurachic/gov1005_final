@@ -116,50 +116,101 @@ server <- function(input, output) {
   
   output$mainTable <- function() {
     
-    if (input$comp == "int") {
-      filteredData <- table_data %>%
-        mutate(p_val = interp_p_val) %>%
-        select(var, no_interp, yes_interp, mean_diff_interp, p_val)
-      columnnames <- c("Variable", "No Interpreter", "Interpreter", "Mean Difference", "P Value")
-    }
+    
     if (input$comp == "pla") {
         filteredData <- table_data %>%
           mutate(p_val = legaiddiv_p_val) %>%
           select(var, pre, post, mean_diff_legaiddiv, p_val)
         columnnames <- c("Variable", "Pre-cessation", "Post-cessation", "Mean Difference", "P Value")
+
+        if(input$signif == FALSE) {
+          filteredData %>%
+            knitr::kable("html", col.names = columnnames) %>%
+            kable_styling("striped", full_width = F) %>%
+            group_rows("Demographics", start_row = 1, end_row = 13) %>%
+            group_rows("Income", start_row = 14, end_row = 25) %>%
+            group_rows("Assets", start_row = 26, end_row = 54) %>%
+            group_rows("Marriage", start_row = 55, end_row = 68) %>%
+            group_rows("Family", start_row = 69, end_row = 73) %>%
+            add_footnote(c("The variable measuring whether the client is the current payee of a spousal support order
+                           has been removed because there are no clients who are the payee of a spousal support order."))
+        }
+        else{
+          filteredData <- filter(filteredData, p_val <= 0.05)
+          filteredData %>%
+            knitr::kable("html", col.names = columnnames) %>%
+            kable_styling("striped", full_width = F) %>%
+            add_footnote(c("The variable measuring whether the client is the current payee of a spousal support order
+                           has been removed because there are no clients who are the payee of a spousal support order."))
+        }
     }
-    if (input$comp == "fs"){
-      filteredData <- table_data %>%
-        mutate(p_val = filing_p_val) %>%
-        select(var, none_filed, spouse_filed, mean_diff_filing, p_val)
-      columnnames <- c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value")
+    else {
+      if (input$comp == "fs"){
+        filteredData <- table_data %>%
+          mutate(p_val = filing_p_val) %>%
+          select(var, none_filed, spouse_filed, mean_diff_filing, p_val)
+        columnnames <- c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value")
+        
+        if(input$signif == FALSE) {
+          filteredData %>%
+            knitr::kable("html", col.names = columnnames) %>%
+            kable_styling("striped", full_width = F) %>%
+            group_rows("Demographics", start_row = 1, end_row = 13) %>%
+            group_rows("Income", start_row = 14, end_row = 25) %>%
+            group_rows("Assets", start_row = 26, end_row = 54) %>%
+            group_rows("Marriage", start_row = 55, end_row = 68) %>%
+            group_rows("Family", start_row = 69, end_row = 73) %>%
+            add_footnote(c("The variable measuring whether the client is the current payee of a spousal support order
+                           has been removed because there are no clients who are the payee of a spousal support order."))
+        }
+        else{
+          filteredData <- filter(filteredData, p_val <= 0.05)
+          filteredData %>%
+            knitr::kable("html", col.names = columnnames) %>%
+            kable_styling("striped", full_width = F) %>%
+            group_rows("Demographics", start_row = 1, end_row = 2) %>%
+            group_rows("Income", start_row = 3, end_row = 8) %>%
+            group_rows("Assets", start_row = 9, end_row = 32) %>%
+            group_rows("Marriage", start_row = 33, end_row = 37) %>%
+            add_footnote(c("The variable measuring whether the client is the current payee of a spousal support order
+                           has been removed because there are no clients who are the payee of a spousal support order."))
+        }
+      }
+      else {
+        if (input$comp == "int") {
+          filteredData <- table_data %>%
+            mutate(p_val = interp_p_val) %>%
+            select(var, no_interp, yes_interp, mean_diff_interp, p_val)
+          columnnames <- c("Variable", "No Interpreter", "Interpreter", "Mean Difference", "P Value")
+          
+          if(input$signif == FALSE) {
+            filteredData %>%
+              knitr::kable("html", col.names = columnnames) %>%
+              kable_styling("striped", full_width = F) %>%
+              group_rows("Demographics", start_row = 1, end_row = 13) %>%
+              group_rows("Income", start_row = 14, end_row = 25) %>%
+              group_rows("Assets", start_row = 26, end_row = 54) %>%
+              group_rows("Marriage", start_row = 55, end_row = 68) %>%
+              group_rows("Family", start_row = 69, end_row = 73) %>%
+              add_footnote(c("The variable measuring whether the client is the current payee of a spousal support order
+                             has been removed because there are no clients who are the payee of a spousal support order."))
+          }
+          else{
+            filteredData <- filter(filteredData, p_val <= 0.05)
+            filteredData %>%
+              knitr::kable("html", col.names = columnnames) %>%
+              kable_styling("striped", full_width = F) %>%
+              add_footnote(c("The variable measuring whether the client is the current payee of a spousal support order
+                             has been removed because there are no clients who are the payee of a spousal support order."))
+          }
+        }
+      }
+      
+      
     }
-  
     
-    if(input$signif == FALSE) {
-      filteredData %>%
-        knitr::kable("html", col.names = columnnames) %>%
-        kable_styling("striped", full_width = F) %>%
-        group_rows("Demographics", start_row = 1, end_row = 13) %>%
-        group_rows("Income", start_row = 14, end_row = 25) %>%
-        group_rows("Assets", start_row = 26, end_row = 54) %>%
-        group_rows("Marriage", start_row = 55, end_row = 68) %>%
-        group_rows("Family", start_row = 69, end_row = 73) %>%
-        add_footnote(c("The variable measuring whether the client is the current payee of a spousal support order
-                       has been removed because there are no clients who are the payee of a spousal support order."))
-    }
-    else{
-      filteredData <- filter(filteredData, p_val <= 0.05)
-      filteredData %>%
-        knitr::kable("html", col.names = columnnames) %>%
-        kable_styling("striped", full_width = F) %>%
-        group_rows("Demographics", start_row = 1, end_row = 2) %>%
-        group_rows("Income", start_row = 3, end_row = 8) %>%
-        group_rows("Assets", start_row = 9, end_row = 32) %>%
-        group_rows("Marriage", start_row = 33, end_row = 37) %>%
-        add_footnote(c("The variable measuring whether the client is the current payee of a spousal support order
-                       has been removed because there are no clients who are the payee of a spousal support order."))
-    }
+      
+    
   }
   
   # wage of client

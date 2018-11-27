@@ -189,11 +189,11 @@ for(i in 1:length(var_names)) {
 i <- 1
 
 for(i in 1:length(var_names)) {
-  table_data$legaiddiv_p_val[table_data$var == var_names[i]] <- t.test(table_data$val[table_data$var == var_names[i]] ~ table_data$filingstatus3[table_data$var == var_names[i]], conf.level = 0.95)$p.value
+  table_data$legaiddiv_p_val[table_data$var == var_names[i]] <- t.test(table_data$val[table_data$var == var_names[i]] ~ table_data$legaiddiv[table_data$var == var_names[i]], conf.level = 0.95)$p.value
 }
 
 for(i in 1:length(var_names)) {
-  table_data$interp_p_val[table_data$var == var_names[i]] <- t.test(table_data$val[table_data$var == var_names[i]] ~ table_data$filingstatus3[table_data$var == var_names[i]], conf.level = 0.95)$p.value
+  table_data$interp_p_val[table_data$var == var_names[i]] <- t.test(table_data$val[table_data$var == var_names[i]] ~ table_data$IsInterpCl[table_data$var == var_names[i]], conf.level = 0.95)$p.value
 }
 
 # get p values and stuff

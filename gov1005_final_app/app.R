@@ -112,32 +112,59 @@ ui <- fluidPage(theme = shinytheme("yeti"),
 # Define server logic
 server <- function(input, output) {
   
+  output$mainTable <- function() {
+    if(input$signif == FALSE) {
+      table_data %>%
+        knitr::kable("html") %>%
+        kable_styling("striped", full_width = F) %>%
+        group_rows("Demographics", start_row = 1, end_row = 13) %>%
+        group_rows("Income", start_row = 14, end_row = 25) %>%
+        group_rows("Assets", start_row = 26, end_row = 54) %>%
+        group_rows("Marriage", start_row = 55, end_row = 68) %>%
+        group_rows("Family", start_row = 69, end_row = 73) %>%
+        add_footnote(c("The variable measuring whether the client is the current payee of a spousal support order
+                       has been removed because there are no clients who are the payee of a spousal support order."))
+    }
+    else{
+      table_data <- filter(table_data, p_val <= 0.05)
+      table_data %>%
+        knitr::kable("html") %>%
+        kable_styling("striped", full_width = F) %>%
+        group_rows("Demographics", start_row = 1, end_row = 2) %>%
+        group_rows("Income", start_row = 3, end_row = 8) %>%
+        group_rows("Assets", start_row = 9, end_row = 32) %>%
+        group_rows("Marriage", start_row = 33, end_row = 37) %>%
+        add_footnote(c("The variable measuring whether the client is the current payee of a spousal support order
+                       has been removed because there are no clients who are the payee of a spousal support order."))
+    }
+  }
+  
   # output$mainTable <- renderUI({
   #   kable(table_data)
   # }, sanitize.text.function = function(x) x)
   # 
   
-  output$mainTable <- renderTable({
-      
-    if (input$signif == TRUE) {
-      table_data <- filter(table_data, p_val <= 0.05)
-      htmlTable(table_data,
-                align = "l",
-                header = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value"),
-                rgroup = (c("Demographic", "Income", "Assets", "Marriage")),
-                n.rgroup = (c(2, 4, 24, 5))
-      )
-    }
-    else {
-      htmlTable(table_data,
-                align = "l",
-                header = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value"),
-                rgroup = (c("Demographic", "Income", "Assets", "Marriage", "Family")),
-                n.rgroup = (c(13, 12, 30, 14, 5))
-      )
-    }
-    
-    }, sanitize.text.function = function(x) x)
+  # output$mainTable <- renderTable({
+  #     
+  #   if (input$signif == TRUE) {
+  #     table_data <- filter(table_data, p_val <= 0.05)
+  #     htmlTable(table_data,
+  #               align = "l",
+  #               header = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value"),
+  #               rgroup = (c("Demographic", "Income", "Assets", "Marriage")),
+  #               n.rgroup = (c(2, 4, 24, 5))
+  #     )
+  #   }
+  #   else {
+  #     htmlTable(table_data,
+  #               align = "l",
+  #               header = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value"),
+  #               rgroup = (c("Demographic", "Income", "Assets", "Marriage", "Family")),
+  #               n.rgroup = (c(13, 12, 30, 14, 5))
+  #     )
+  #   }
+  #   
+  #   }, sanitize.text.function = function(x) x)
   
   # wage of client
   output$wagePlotCl <- renderPlot({

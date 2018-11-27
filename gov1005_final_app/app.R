@@ -6,6 +6,7 @@ library(kableExtra)
 library(htmlTable)
 library(xtable)
 library(janitor)
+library(tidyverse)
 
 load("Data/workspace.RData")
 
@@ -18,7 +19,12 @@ ui <- fluidPage(theme = shinytheme("yeti"),
     tabPanel("Summary",
              sidebarLayout(
                sidebarPanel(
-                 checkboxInput(inputId = "signif", label = "Significant Differences Only", value = FALSE)
+                 checkboxInput(inputId = "signif", label = "Significant Differences Only", value = FALSE),
+                 selectInput(inputId = "comp", label = "Select how to compare:", 
+                             choices = c(`PLA divorce practice status` = "pla",
+                                         `Divorce filing status` = "fs",
+                                         `Interpreter` = "int"),
+                             selected = "pla")
                ),
                mainPanel(
                  h3("What is the Access to Justice Lab?"),
@@ -109,9 +115,30 @@ ui <- fluidPage(theme = shinytheme("yeti"),
 server <- function(input, output) {
   
   output$mainTable <- function() {
+    
+    if (input$comp == "int") {
+      filteredData <- table_data %>%
+        mutate(p_val = interp_p_val) %>%
+        select(var, no_interp, yes_interp, mean_diff_interp, p_val)
+      columnnames <- c("Variable", "No Interpreter", "Interpreter", "Mean Difference", "P Value")
+    }
+    if (input$comp == "pla") {
+        filteredData <- table_data %>%
+          mutate(p_val = legaiddiv_p_val) %>%
+          select(var, pre, post, mean_diff_legaiddiv, p_val)
+        columnnames <- c("Variable", "Pre-cessation", "Post-cessation", "Mean Difference", "P Value")
+    }
+    if (input$comp == "fs"){
+      filteredData <- table_data %>%
+        mutate(p_val = filing_p_val) %>%
+        select(var, none_filed, spouse_filed, mean_diff_filing, p_val)
+      columnnames <- c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value")
+    }
+  
+    
     if(input$signif == FALSE) {
-      table_data %>%
-        knitr::kable("html", col.names = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value")) %>%
+      filteredData %>%
+        knitr::kable("html", col.names = columnnames) %>%
         kable_styling("striped", full_width = F) %>%
         group_rows("Demographics", start_row = 1, end_row = 13) %>%
         group_rows("Income", start_row = 14, end_row = 25) %>%
@@ -122,9 +149,9 @@ server <- function(input, output) {
                        has been removed because there are no clients who are the payee of a spousal support order."))
     }
     else{
-      table_data <- filter(table_data, p_val <= 0.05)
-      table_data %>%
-        knitr::kable("html", col.names = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value")) %>%
+      filteredData <- filter(filteredData, p_val <= 0.05)
+      filteredData %>%
+        knitr::kable("html", col.names = columnnames) %>%
         kable_styling("striped", full_width = F) %>%
         group_rows("Demographics", start_row = 1, end_row = 2) %>%
         group_rows("Income", start_row = 3, end_row = 8) %>%
@@ -140,7 +167,6 @@ server <- function(input, output) {
     # generate bins based on input$bins from ui.R
     x    <- wage_data$MonthWageCl
     bins <- seq(0, 7000, length.out = input$wageBins + 1)
-    # nb - try doing geom hist to see if it looks nicer
     # draw the histogram with the specified number of bins
     hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Participant Wages", xlab = "Wages")
   })
@@ -150,7 +176,6 @@ server <- function(input, output) {
     # generate bins based on input$bins from ui.R
     x    <- wage_data$AmtMnthIncOP
     bins <- seq(0, 7000, length.out = input$wageBins + 1)
-    # nb - remove 20000 income from op graph and change scales to match
     # draw the histogram with the specified number of bins
     hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Opposition Party Wages", xlab = "Wages")
   })

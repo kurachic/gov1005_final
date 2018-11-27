@@ -70,7 +70,7 @@ demo_data$LangHH[demo_data$LangHH != "English"] <- 0
 demo_data$LangHH[demo_data$LangHH == "English"] <- 1
 
 demo_data <- demo_data %>%
-  select(filingstatus3, IsFemCl, age, IsBlaCl, IsHisCl, IsWhiCl,
+  select(filingstatus3, legaiddiv, IsInterpCl, IsFemCl, age, IsBlaCl, IsHisCl, IsWhiCl,
          IsOthAsiCl, LangHH, IsMentPhysCl, IsMentPhysOp,
          IsAlcoSubsCl, IsAlcoSubsOp, IsCrimCl, IsCrimOP) %>%
   gather(key = "var", value = "val", IsFemCl, age, IsBlaCl, IsHisCl, IsWhiCl, IsOthAsiCl, LangHH, IsMentPhysCl, IsMentPhysOp, IsAlcoSubsCl, IsAlcoSubsOp, IsCrimCl, IsCrimOP) %>%
@@ -90,7 +90,7 @@ income$MedInsPrimHold[income$MedInsPrimHold == "Client"] <- 1
 income$MedInsPrimHold[income$MedInsPrimHold == "Other" | income$MedInsPrimHold == "Opposing Spouse" | income$MedInsPrimHold == ".n"] <- 0
 
 income <- income %>%
-  select(filingstatus3, IsEmplCl, IsEmplOP, MonthWageCl, AmtMnthIncOP, IsFdStmpCl, IsSSIOrSSDICl, IsTANFCl, IsOthIncCl, IsPensSoleCl, IsPensSoleOP, IsMedInsCl, MedInsPrimHold) %>%
+  select(filingstatus3, legaiddiv, IsInterpCl, IsEmplCl, IsEmplOP, MonthWageCl, AmtMnthIncOP, IsFdStmpCl, IsSSIOrSSDICl, IsTANFCl, IsOthIncCl, IsPensSoleCl, IsPensSoleOP, IsMedInsCl, MedInsPrimHold) %>%
   gather(key = "var", value = "val", IsEmplCl, IsEmplOP, MonthWageCl, AmtMnthIncOP, IsFdStmpCl, IsSSIOrSSDICl, IsTANFCl, IsOthIncCl, IsPensSoleCl, IsPensSoleOP, IsMedInsCl, MedInsPrimHold) %>%
   mutate(val = as.numeric(val)) %>%
   mutate(type = "Income")
@@ -105,7 +105,7 @@ marr$filingstatus3[marr$filingstatus3 == "Spouse filed, client does not want div
 marr$filingstatus3[marr$filingstatus3 == "Nothing filed, client wants divorce"] <- "none_filed"
 
 marr <- marr %>%
-  select(filingstatus3, lengthmar, IsOPInClHm, prevdiv, IsBenSpSupPhCnty, IsClWntSpSup, IsOPEconCla, IsPFAAgstCl, IsPFAProtCl, IsPFAAgstOP, IsGrndDiv2Yr, IsGrndDivMutCon, IsGrndDivDese, IsGrnDivInd, IsGrnDivOth) %>%
+  select(filingstatus3, legaiddiv, IsInterpCl, lengthmar, IsOPInClHm, prevdiv, IsBenSpSupPhCnty, IsClWntSpSup, IsOPEconCla, IsPFAAgstCl, IsPFAProtCl, IsPFAAgstOP, IsGrndDiv2Yr, IsGrndDivMutCon, IsGrndDivDese, IsGrnDivInd, IsGrnDivOth) %>%
   gather(key = "var", value = "val", lengthmar, IsOPInClHm, prevdiv, IsBenSpSupPhCnty, IsClWntSpSup, IsOPEconCla, IsPFAAgstCl, IsPFAProtCl, IsPFAAgstOP, IsGrndDiv2Yr, IsGrndDivMutCon, IsGrndDivDese, IsGrnDivInd, IsGrnDivOth) %>%
   mutate(val = as.numeric(val)) %>%
   mutate(type = "Marr")
@@ -120,7 +120,7 @@ fam$filingstatus3[fam$filingstatus3 == "Spouse filed, client does not want divor
 fam$filingstatus3[fam$filingstatus3 == "Nothing filed, client wants divorce"] <- "none_filed"
 
 fam <- fam %>%
-  select(filingstatus3, num_chld, chldmar, chldmar18, chldmar18cust, chldmar18supp) %>%
+  select(filingstatus3, legaiddiv, IsInterpCl, num_chld, chldmar, chldmar18, chldmar18cust, chldmar18supp) %>%
   gather(key = "var", value = "val", num_chld, chldmar, chldmar18, chldmar18cust, chldmar18supp) %>%
   mutate(val = as.numeric(val)) %>%
   mutate(type = "fam")
@@ -164,7 +164,7 @@ asset$OwnCC[asset$num_CC != 0] <- 1
 asset$OwnLoan[asset$num_Loan != 0] <- 1
 
 asset <- asset %>%
-  select(filingstatus3, clownasset, OwnREH, num_REH, ClOwnREH, desshareREH, OwnAuto,num_Auto, ClOwnAuto, desshareAuto, OwnPenAnn, num_PenAnn, clownPenAnn, dessharePenAnn, OwnBkAcct, num_BkAcct, clownBkAcct, desshareBkAcct, OwnBus, num_Bus, clownBus, desshareBus, OwnCC, num_CC, clownCC, desOPCC, OwnLoan, num_Loan, clownLoan, desOPLoan) %>%
+  select(filingstatus3, legaiddiv, IsInterpCl, clownasset, OwnREH, num_REH, ClOwnREH, desshareREH, OwnAuto,num_Auto, ClOwnAuto, desshareAuto, OwnPenAnn, num_PenAnn, clownPenAnn, dessharePenAnn, OwnBkAcct, num_BkAcct, clownBkAcct, desshareBkAcct, OwnBus, num_Bus, clownBus, desshareBus, OwnCC, num_CC, clownCC, desOPCC, OwnLoan, num_Loan, clownLoan, desOPLoan) %>%
   gather(key = "var", value = "val", clownasset, OwnREH, num_REH, ClOwnREH, desshareREH, OwnAuto, num_Auto, ClOwnAuto, desshareAuto, OwnPenAnn, num_PenAnn, clownPenAnn, dessharePenAnn, OwnBkAcct, num_BkAcct, clownBkAcct, desshareBkAcct, OwnBus, num_Bus, clownBus, desshareBus, OwnCC, num_CC, clownCC, desOPCC, OwnLoan, num_Loan, clownLoan, desOPLoan) %>%
   mutate(val = as.numeric(val)) %>%
   mutate(type = "Asset")
@@ -176,37 +176,186 @@ table_data <- asset %>%
   merge(demo_data, all = TRUE) %>%
   merge(marr, all = TRUE) %>%
   merge(fam, all = TRUE) %>%
-  mutate(p_val = 0)
+  mutate(filing_p_val = 0, legaiddiv_p_val = 0, interp_p_val = 0)
 
 var_names <- unique(table_data$var)
 
 i <- 1
 
 for(i in 1:length(var_names)) {
-  table_data$p_val[table_data$var == var_names[i]] <- t.test(table_data$val[table_data$var == var_names[i]] ~ table_data$filingstatus3[table_data$var == var_names[i]], conf.level = 0.95)$p.value
+  table_data$filing_p_val[table_data$var == var_names[i]] <- t.test(table_data$val[table_data$var == var_names[i]] ~ table_data$filingstatus3[table_data$var == var_names[i]], conf.level = 0.95)$p.value
+}
+
+i <- 1
+
+for(i in 1:length(var_names)) {
+  table_data$legaiddiv_p_val[table_data$var == var_names[i]] <- t.test(table_data$val[table_data$var == var_names[i]] ~ table_data$filingstatus3[table_data$var == var_names[i]], conf.level = 0.95)$p.value
+}
+
+for(i in 1:length(var_names)) {
+  table_data$interp_p_val[table_data$var == var_names[i]] <- t.test(table_data$val[table_data$var == var_names[i]] ~ table_data$filingstatus3[table_data$var == var_names[i]], conf.level = 0.95)$p.value
 }
 
 # get p values and stuff
-table_data<-table_data %>%
-  group_by(filingstatus3, var, p_val, type) %>%
+filing_data <-table_data %>%
+  group_by(filingstatus3, var, filing_p_val, type) %>%
   summarise(mean = mean(val, na.rm = TRUE), sd = sd(val, na.rm = TRUE)) %>%
   unite(mean_sd, mean, sd) %>%
   spread(filingstatus3, mean_sd) %>%
   separate(none_filed, into = c("nf_mean", "nf_sd"), sep = "_") %>%
   separate(spouse_filed, into = c("s_mean", "s_sd"), sep = "_") %>%
   group_by(var) %>%
-  mutate(nf_mean = as.numeric(nf_mean), s_mean = as.numeric(s_mean), nf_sd = as.numeric(nf_sd), s_sd = as.numeric(s_sd), mean_diff = s_mean - nf_mean) %>%
+  mutate(nf_mean = as.numeric(nf_mean), s_mean = as.numeric(s_mean), nf_sd = as.numeric(nf_sd), s_sd = as.numeric(s_sd), mean_diff_filing = s_mean - nf_mean) %>%
   unite(none_filed, nf_mean, nf_sd) %>%
   unite(spouse_filed, s_mean, s_sd) %>%
   gather(key = "filing_status", "value" = mean_sd, none_filed, spouse_filed) %>%
   separate(mean_sd, c("mean", "sd"), sep = "_") %>%
-  select(var, filing_status, mean, mean_diff, p_val, type) %>%
+  select(var, filing_status, mean, mean_diff_filing, filing_p_val, type) %>%
   spread(filing_status, mean) %>%
-  select(var, none_filed, spouse_filed, mean_diff, p_val) %>%
-  ungroup() %>%
-  mutate(var = as.factor(var)) %>%
-  mutate(var = fct_relevel(var, c("IsFemCl", "age", "IsBlaCl", "IsHisCl", "IsWhiCl", "IsOthAsiCl", "LangHH", "IsMentPhysCl", "IsMentPhysOp","IsAlcoSubsCl", "IsAlcoSubsOp", "IsCrimCl", "IsCrimOP", "IsEmplCl", "IsEmplOP", "MonthWageCl", "AmtMnthIncOP", "IsFdStmpCl", "IsSSIOrSSDICl", "IsTANFCl", "IsOthIncCl", "IsPensSoleCl", "IsPensSoleOP", "IsMedInsCl", "MedInsPrimHold", "clownasset", "OwnREH", "num_REH", "ClOwnREH", "desshareREH", "OwnAuto","num_Auto", "ClOwnAuto", "desshareAuto", "OwnPenAnn", "num_PenAnn", "clownPenAnn", "dessharePenAnn", "OwnBkAcct", "num_BkAcct", "clownBkAcct", "desshareBkAcct", "OwnBus", "num_Bus", "clownBus", "desshareBus", "OwnCC", "num_CC", "clownCC", "desOPCC", "OwnLoan", "num_Loan", "clownLoan", "desOPLoan", "lengthmar", "IsOPInClHm", "prevdiv", "IsBenSpSupPhCnty", "IsClWntSpSup", "IsOPEconCla", "IsPFAAgstCl", "IsPFAProtCl", "IsPFAAgstOP", "IsGrndDiv2Yr", "IsGrndDivMutCon", "IsGrndDivDese", "IsGrnDivInd", "IsGrnDivOth", "num_chld", "chldmar", "chldmar18", "chldmar18cust", "chldmar18supp"))) %>%
-  arrange(var) %>%
-  mutate(none_filed = as.numeric(none_filed), spouse_filed = as.numeric(spouse_filed))
+  select(var, none_filed, spouse_filed, mean_diff_filing, filing_p_val) %>%
+  ungroup()
+
+legaiddiv_data <- table_data
+  
+legaiddiv_data$legaiddiv[legaiddiv_data$legaiddiv == "Post-cessation"] <- "post"
+legaiddiv_data$legaiddiv[legaiddiv_data$legaiddiv == "Pre-cessation"] <- "pre"
+
+legaiddiv_data <- legaiddiv_data %>%
+  group_by(legaiddiv, var, legaiddiv_p_val, type) %>%
+  summarise(mean = mean(val, na.rm = TRUE), sd = sd(val, na.rm = TRUE)) %>%
+  unite(mean_sd, mean, sd) %>%
+  spread(legaiddiv, mean_sd) %>%
+  separate(post, into = c("post_mean", "post_sd"), sep = "_") %>%
+  separate(pre, into = c("pre_mean", "pre_sd"), sep = "_") %>%
+  group_by(var) %>%
+  mutate(post_mean = as.numeric(post_mean), pre_mean = as.numeric(pre_mean), post_sd = as.numeric(post_sd), pre_sd = as.numeric(pre_sd), mean_diff_legaiddiv = post_mean - pre_mean) %>%
+  unite(post, post_mean, post_sd) %>%
+  unite(pre, pre_mean, pre_sd) %>%
+  gather(key = "legaiddiv", "value" = mean_sd, pre, post) %>%
+  separate(mean_sd, c("mean", "sd"), sep = "_") %>%
+  select(var, legaiddiv, mean, mean_diff_legaiddiv, legaiddiv_p_val, type) %>%
+  spread(legaiddiv, mean) %>%
+  select(var, pre, post, mean_diff_legaiddiv, legaiddiv_p_val) %>%
+  ungroup()
+
+interp_data <- table_data
+
+interp_data$IsInterpCl[interp_data$IsInterpCl == "1"] <- "yes_interp"
+interp_data$IsInterpCl[interp_data$IsInterpCl == "0"] <- "no_interp"
+
+interp_data <- interp_data %>%
+  group_by(IsInterpCl, var, interp_p_val, type) %>%
+  summarise(mean = mean(val, na.rm = TRUE), sd = sd(val, na.rm = TRUE)) %>%
+  unite(mean_sd, mean, sd) %>%
+  spread(IsInterpCl, mean_sd) %>%
+  separate(yes_interp, into = c("yes_mean", "yes_sd"), sep = "_") %>%
+  separate(no_interp, into = c("no_mean", "no_sd"), sep = "_") %>%
+  group_by(var) %>%
+  mutate(yes_mean = as.numeric(yes_mean), no_mean = as.numeric(no_mean), yes_sd = as.numeric(yes_sd), no_sd = as.numeric(no_sd), mean_diff_interp = yes_mean - no_mean) %>%
+  unite(yes_interp, yes_mean, yes_sd) %>%
+  unite(no_interp, no_mean, no_sd) %>%
+  gather(key = "interp", "value" = mean_sd, yes_interp, no_interp) %>%
+  separate(mean_sd, c("mean", "sd"), sep = "_") %>%
+  select(var, interp, mean, mean_diff_interp, interp_p_val, type) %>%
+  spread(interp, mean) %>%
+  select(var, no_interp, yes_interp, mean_diff_interp, interp_p_val) %>%
+  ungroup()
+
+table_data <- filing_data %>%
+  merge(legaiddiv_data, all = TRUE) %>%
+  merge(interp_data, all = TRUE)
 
 ```
+
+```{r}
+# make demo variables pretty for table
+table_data$var[table_data$var == "IsFemCl"] <- "Female"
+table_data$var[table_data$var == "age"] <- "Age"
+table_data$var[table_data$var == "IsBlaCl"] <- "Black/African-American"
+table_data$var[table_data$var == "IsHisCl"] <- "Hispanic/Latino/of Spanish origin"
+table_data$var[table_data$var == "IsWhiCl"] <- "White/Caucasian"
+table_data$var[table_data$var == "IsOthAsiCl"] <- "Other Race"
+table_data$var[table_data$var == "LangHH"] <- "English primarily spoken in marital home"
+table_data$var[table_data$var == "IsMentPhysCl"] <- "Client has history of mental or physical disability"
+table_data$var[table_data$var == "IsMentPhysOp"] <- "Spouse has history of mental or physical disability"
+table_data$var[table_data$var == "IsAlcoSubsCl"] <- "Client has history of alcohol or substance abuse"
+table_data$var[table_data$var == "IsAlcoSubsOp"] <- "Spouse has history of alcohol or substance abuse"
+table_data$var[table_data$var == "IsCrimCl"] <- "Client has criminal record"
+table_data$var[table_data$var == "IsCrimOP"] <- "Spouse has criminal record"
+
+# make income variables pretty for table
+table_data$var[table_data$var == "IsEmplCl"] <- "Client Employed"
+table_data$var[table_data$var == "IsEmplOP"] <- "Spouse employed"
+table_data$var[table_data$var == "MonthWageCl"] <- "Client's monthly employment income"
+table_data$var[table_data$var == "AmtMnthIncOP"] <- "Spouse's monthly employment income"
+table_data$var[table_data$var == "IsFdStmpCl"] <- "Food stamps"
+table_data$var[table_data$var == "IsSSIOrSSDICl"] <- "SSI or SSDI"
+table_data$var[table_data$var == "IsTANFCl"] <- "TANF or other welfare"
+table_data$var[table_data$var == "IsOthIncCl"] <- "Other income"
+table_data$var[table_data$var == "IsPensSoleCl"] <- "Client has pension solely in his/her name"
+table_data$var[table_data$var == "IsPensSoleOP"] <- "Spouse has pension solely in his/her name"
+table_data$var[table_data$var == "IsMedInsCl"] <- "Client has health insurance"
+table_data$var[table_data$var == "MedInsPrimHold"] <- "Client is policyholder of client's health insurance"
+
+# make asset variables pretty for table
+table_data$var[table_data$var == "clownasset"] <- "Client has sole or joint ownership of any asset"
+table_data$var[table_data$var == "OwnREH"] <- "Client or Spouse has real estate/home"
+table_data$var[table_data$var == "num_REH"] <- "Number of real estate holdings/houses owned by Client or Spouse"
+table_data$var[table_data$var == "ClOwnREH"] <- "Client has sole or joint ownership of real estate/house"
+table_data$var[table_data$var == "desshareREH"] <- "Client wants sole/partial ownership of real estate/house"
+table_data$var[table_data$var == "OwnAuto"] <- "Client or Spouse has automobile"
+table_data$var[table_data$var == "num_Auto"] <- "Number of automobiles owned by Client or Spouse"
+table_data$var[table_data$var == "ClOwnAuto"] <- "Client has sole or joint ownership of automobile"
+table_data$var[table_data$var == "desshareAuto"] <- "Client wants sole/partial ownership of automobile"
+table_data$var[table_data$var == "OwnPenAnn"] <- "Client or Spouse has pension/annuity"
+table_data$var[table_data$var == "num_PenAnn"] <- "Number of pensions/annuities owned by Client or Spouse"
+table_data$var[table_data$var == "clownPenAnn"] <- "Client has sole or joint ownership of pension/annuity"
+table_data$var[table_data$var == "dessharePenAnn"] <- "Client wants sole/partial ownership of pension/annuity"
+table_data$var[table_data$var == "OwnBkAcct"] <- "Client or Spouse has bank account"
+table_data$var[table_data$var == "num_BkAcct"] <- "Number of bank accounts owned by Client or Spouse"
+table_data$var[table_data$var == "clownBkAcct"] <- "Client has sole or joint ownership of bank account"
+table_data$var[table_data$var == "desshareBkAcct"] <- "Client wants sole/partial ownership of bank account"
+table_data$var[table_data$var == "OwnBus"] <- "Client or Spouse has business"
+table_data$var[table_data$var == "num_Bus"] <- "Number of businesses owned by Client or Spouse"
+table_data$var[table_data$var == "clownBus"] <- "Client has sole or joint ownership of business"
+table_data$var[table_data$var == "desshareBus"] <- "Client wants sole/partial ownership of business"
+table_data$var[table_data$var == "OwnCC"] <- "Client or Spouse has credit card"
+table_data$var[table_data$var == "num_CC"] <- "Number of credit cards owned by Client or Spouse"
+table_data$var[table_data$var == "clownCC"] <- "Client has sole or joint ownership of credit card"
+table_data$var[table_data$var == "desOPCC"] <- "Client wants spouse to own credit card debt"
+table_data$var[table_data$var == "OwnLoan"] <- "Client or Spouse has loan"
+table_data$var[table_data$var == "num_Loan"] <- "Number of loans owned by Client or Spouse"
+table_data$var[table_data$var == "clownLoan"] <- "Client has sole or joint ownership of loan"
+table_data$var[table_data$var == "desOPLoan"] <- "Client wants spouse to own loan debt"
+
+# make marriage variables pretty for table
+table_data$var[table_data$var == "lengthmar"] <- "Years of marriage"
+table_data$var[table_data$var == "IsOPInClHm"] <- "Spouse currently lives in client's home"
+table_data$var[table_data$var == "prevdiv"] <- "Client is previously divorced"
+table_data$var[table_data$var == "IsBenSpSupPhCnty"] <- "Client is current beneficiary of spousal support order"
+table_data$var[table_data$var == "IsClWntSpSup"] <- "Client wants spousal support"
+table_data$var[table_data$var == "IsOPEconCla"] <- "Spouse is making economic claims"
+table_data$var[table_data$var == "IsPFAAgstCl"] <- "Client has had PFA order entered against him/her"
+table_data$var[table_data$var == "IsPFAProtCl"] <- "Client has had PFA order entered protecting him/her"
+table_data$var[table_data$var == "IsPFAAgstOP"] <- "Spouse has had PFA order entered against him/her"
+table_data$var[table_data$var == "IsGrndDiv2Yr"] <- "Grounds for divorce: 2-year separation"
+table_data$var[table_data$var == "IsGrndDivMutCon"] <- "Grounds for divorce: mutual consent"
+table_data$var[table_data$var == "IsGrndDivDese"] <- "Grounds for divorce: desertion"
+table_data$var[table_data$var == "IsGrnDivInd"] <- "Grounds for divorce: indignities"
+table_data$var[table_data$var == "IsGrnDivOth"] <- "Grounds for divorce: other"
+
+# make fam vars pretty
+table_data$var[table_data$var == "num_chld"] <- "Number of children of either spouse"
+table_data$var[table_data$var == "chldmar"] <- "Client has child of marriage"
+table_data$var[table_data$var == "chldmar18"] <- "Client has child of marriage under 18"
+table_data$var[table_data$var == "chldmar18cust"] <- "Client desires custody over child of marriage under 18"
+table_data$var[table_data$var == "chldmar18supp"] <- "Client desires child support for child of marriage under 18"
+
+
+table_data <- table_data %>%
+  mutate(var = as.factor(var)) %>%
+  mutate(var = fct_relevel(var, c("Female", "Age", "Black/African-American", "Hispanic/Latino/of Spanish origin", "White/Caucasian", "Other Race", "English primarily spoken in marital home", "Client has history of mental or physical disability", "Spouse has history of mental or physical disability","Client has history of alcohol or substance abuse", "Spouse has history of alcohol or substance abuse", "Client has criminal record", "Spouse has criminal record", "Client Employed", "Spouse employed", "Client's monthly employment income", "Spouse's monthly employment income", "Food stamps", "SSI or SSDI", "TANF or other welfare", "Other income", "Client has pension solely in his/her name", "Spouse has pension solely in his/her name", "Client has health insurance", "Client is policyholder of client's health insurance", "Client has sole or joint ownership of any asset", "Client or Spouse has real estate/home", "Number of real estate holdings/houses owned by Client or Spouse", "Client has sole or joint ownership of real estate/house", "Client wants sole/partial ownership of real estate/house", "Client or Spouse has automobile","Number of automobiles owned by Client or Spouse", "Client has sole or joint ownership of automobile", "Client wants sole/partial ownership of automobile", "Client or Spouse has pension/annuity", "Number of pensions/annuities owned by Client or Spouse", "Client has sole or joint ownership of pension/annuity", "Client wants sole/partial ownership of pension/annuity", "Client or Spouse has bank account", "Number of bank accounts owned by Client or Spouse", "Client has sole or joint ownership of bank account", "Client wants sole/partial ownership of bank account", "Client or Spouse has business", "Number of businesses owned by Client or Spouse", "Client has sole or joint ownership of business", "Client wants sole/partial ownership of business", "Client or Spouse has credit card", "Number of credit cards owned by Client or Spouse", "Client has sole or joint ownership of credit card", "Client wants spouse to own credit card debt", "Client or Spouse has loan", "Number of loans owned by Client or Spouse", "Client has sole or joint ownership of loan", "Client wants spouse to own loan debt", "Years of marriage", "Spouse currently lives in client's home", "Client is previously divorced", "Client is current beneficiary of spousal support order", "Client wants spousal support", "Spouse is making economic claims", "Client has had PFA order entered against him/her", "Client has had PFA order entered protecting him/her", "Spouse has had PFA order entered against him/her", "Grounds for divorce: 2-year separation", "Grounds for divorce: mutual consent", "Grounds for divorce: desertion", "Grounds for divorce: indignities", "Grounds for divorce: other", "Number of children of either spouse", "Client has child of marriage", "Client has child of marriage under 18", "Client desires custody over child of marriage under 18", "Client desires child support for child of marriage under 18"))) %>%
+  arrange(var) %>%
+  mutate(none_filed = as.numeric(none_filed), spouse_filed = as.numeric(spouse_filed), yes_interp = as.numeric(yes_interp), no_interp = as.numeric(no_interp), post = as.numeric(post), pre = as.numeric(pre))
+```
+

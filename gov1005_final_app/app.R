@@ -111,7 +111,7 @@ server <- function(input, output) {
   output$mainTable <- function() {
     if(input$signif == FALSE) {
       table_data %>%
-        knitr::kable("html") %>%
+        knitr::kable("html", col.names = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value")) %>%
         kable_styling("striped", full_width = F) %>%
         group_rows("Demographics", start_row = 1, end_row = 13) %>%
         group_rows("Income", start_row = 14, end_row = 25) %>%
@@ -124,7 +124,7 @@ server <- function(input, output) {
     else{
       table_data <- filter(table_data, p_val <= 0.05)
       table_data %>%
-        knitr::kable("html") %>%
+        knitr::kable("html", col.names = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value")) %>%
         kable_styling("striped", full_width = F) %>%
         group_rows("Demographics", start_row = 1, end_row = 2) %>%
         group_rows("Income", start_row = 3, end_row = 8) %>%

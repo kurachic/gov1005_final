@@ -140,6 +140,11 @@ server <- function(input, output) {
           filteredData %>%
             knitr::kable("html", col.names = columnnames) %>%
             kable_styling("striped", full_width = F) %>%
+            group_rows("Demographics", start_row = 1, end_row = 4) %>%
+            group_rows("Income", start_row = 5, end_row = 8) %>%
+            group_rows("Assets", start_row = 9, end_row = 26) %>%
+            group_rows("Marriage", start_row = 27, end_row = 31) %>%
+            group_rows("Family", start_row = 32, end_row = 35) %>%
             add_footnote(c("The variable measuring whether the client is the current payee of a spousal support order
                            has been removed because there are no clients who are the payee of a spousal support order."))
         }
@@ -200,6 +205,9 @@ server <- function(input, output) {
             filteredData %>%
               knitr::kable("html", col.names = columnnames) %>%
               kable_styling("striped", full_width = F) %>%
+              group_rows("Demographics", start_row = 1, end_row = 7) %>%
+              group_rows("Assets", start_row = 8, end_row = 18) %>%
+              group_rows("Marriage", start_row = 19, end_row = 24) %>%
               add_footnote(c("The variable measuring whether the client is the current payee of a spousal support order
                              has been removed because there are no clients who are the payee of a spousal support order."))
           }

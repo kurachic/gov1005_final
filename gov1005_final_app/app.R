@@ -20,6 +20,19 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                  checkboxInput(inputId = "signif", label = "Significant Differences Only", value = FALSE)
                ),
                mainPanel(
+                 h3("What is the Access to Justice Lab?"),
+                 h5("The Access to Justice Lab is a research clinic at Harvard Law School. The Lab runs randomized
+                    control trials in the legal system in order to assess how accessible various components are
+                    to pro se litigants - people without laywers."),
+                 h3("What is the Philadelphia Divorce Study?"),
+                 h5("The Philadelphia Divorce Study randomized people looking for divorce into two groups - having a lawyer,
+                    and not having a lawyer but having self-help materials."),
+                 h3("The Data"),
+                 h5("The data here includes all 378 people who went through a 45 minute intake interview.
+                    67 of these people were ultimately excluded from the study because their spouse had already filed for
+                    divorce. For the purposes of this project, these people have been included in order to examine
+                    the demographic and other information collected in the interview."),
+                 br(),
                  tableOutput("mainTable")
                )
              )
@@ -109,6 +122,7 @@ server <- function(input, output) {
     if (input$signif == TRUE) {
       table_data <- filter(table_data, p_val <= 0.05)
       htmlTable(table_data,
+                align = "l",
                 header = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value"),
                 rgroup = (c("Demographic", "Income", "Assets", "Marriage")),
                 n.rgroup = (c(2, 4, 24, 5))
@@ -116,6 +130,7 @@ server <- function(input, output) {
     }
     else {
       htmlTable(table_data,
+                align = "l",
                 header = c("Variable", "Nothing Filed", "Spouse Filed", "Mean Difference", "P Value"),
                 rgroup = (c("Demographic", "Income", "Assets", "Marriage", "Family")),
                 n.rgroup = (c(13, 12, 30, 14, 5))

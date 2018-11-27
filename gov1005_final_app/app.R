@@ -205,12 +205,7 @@ server <- function(input, output) {
           }
         }
       }
-      
-      
     }
-    
-      
-    
   }
   
   # wage of client

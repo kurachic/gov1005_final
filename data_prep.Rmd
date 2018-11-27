@@ -258,7 +258,7 @@ interp_data <- interp_data %>%
   separate(mean_sd, c("mean", "sd"), sep = "_") %>%
   select(var, interp, mean, mean_diff_interp, interp_p_val, type) %>%
   spread(interp, mean) %>%
-  select(var, no_interp, yes_interp, mean_diff_interp, interp_p_val) %>%
+  select(var, no_interp, yes_interp, mean_diff_interp, interp_p_val, type) %>%
   ungroup()
 
 table_data <- filing_data %>%

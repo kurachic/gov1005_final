@@ -33,7 +33,11 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                     to pro se litigants - people without laywers."),
                  h3("What is the Philadelphia Divorce Study?"),
                  h5("The Philadelphia Divorce Study randomized people looking for divorce into two groups - having a lawyer,
-                    and not having a lawyer but having self-help materials."),
+                    and not having a lawyer but having self-help materials. The Lab partnered with Philadelphia Legal
+                    Services (PLA) and Philadelphia VIP to offer representation. Approximately a year into the study, budgetary 
+                    restricts resulted in PLA terminating representation for divorce cases other than those
+                    involving domestic violence or other special circumstances, resulting in increased referrals to 
+                    Philadelphia VIP."),
                  h3("The Data"),
                  h5("The data here includes all 378 people who went through a 45 minute intake interview.
                     67 of these people were ultimately excluded from the study because their spouse had already filed for
@@ -115,7 +119,6 @@ ui <- fluidPage(theme = shinytheme("yeti"),
 server <- function(input, output) {
   
   output$mainTable <- function() {
-    
     
     if (input$comp == "pla") {
         filteredData <- table_data %>%

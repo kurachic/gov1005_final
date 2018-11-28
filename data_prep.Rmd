@@ -15,60 +15,84 @@ library(knitr)
 ```
 
 ```{r message = FALSE}
-# random stuff 
-
+# load data
 all_data <- read_csv("gov1005_final_app/Data/philly_vars.csv")
 
+# prepare mini table with just stuff about wages
 wage_data <- all_data %>%
   filter(!is.na(MonthWageCl), MonthWageCl != 0, !is.na(AmtMnthIncOP), AmtMnthIncOP != 0, AmtMnthIncOP <= 15000) 
 
+# figure out how many clients are unemployed
 number_zero_cl <- all_data %>%
   select(RefNum, MonthWageCl) %>%
   filter(MonthWageCl == 0) %>%
   count(MonthWageCl)
 
+# figure out how many opposition are unemployed
 number_zero_op <- all_data %>%
   select(RefNum, AmtMnthIncOP) %>%
   filter(AmtMnthIncOP == 0) %>%
   count(AmtMnthIncOP)
 
+# mini table with just length of marriage
 marr_data <- all_data %>%
   select(lengthmar) %>%
   filter(! is.na(lengthmar))
   
+# get a table with percentages of races
 race_data <- all_data %>%
-  # subtracting 2 from white clients due to 2 people marking both white and hispanic - counting white hispanics as just hispanic
+  # get total
   mutate(total = sum(IsBlaCl + IsWhiCl + IsHisCl + IsAsiCl + IsOthCl)) %>%
+  # subtracting 2 from white clients due to 2 people marking both white and hispanic - counting white hispanics as just hispanic
   summarize(Black = sum((IsBlaCl)), White = (sum(IsWhiCl) - 2), Hispanic = sum(IsHisCl), Asian = sum(IsAsiCl), Other = sum(IsOthCl), total = mean(total)) %>%
+  # gather it
   gather(key = "race", "value" = n, Black, White, Hispanic, Asian, Other) %>%
+  # make into percent
   mutate(n = paste0(round((n / total) * 100, digits = 2), "%")) %>%
   select(race, n)
 
+# get all the clients who are getting benefits and sum
 ben_data <- all_data %>%
   filter(IsBenSpSupCl == 1 | IsTANFCl == 1 | IsSSIOrSSDICl == 1 | IsSSCl == 1 | IsOthRetCl == 1 | IsUnempCl == 1 | IsFdStmpCl == 1 | IsOthIncCl == 1) %>%
   summarize(n = n())
 
+# get all the data on domestic abuse
 dom_abuse <- all_data %>%
   select(IsPFAAgstCl, DatePFAAgstCl, IsPFAAgstClPhCnty, IsPFAAgstClStillEff, IsPFAProtCl, DatePFAProtCl, IsPFAProtClPhCnty, IsPFAProtClStillEff, IsPFAAgstOP)
+
+# get data for child bar graph
+
+child_data <- all_data %>%
+  select(num_chld) %>%
+  mutate(num_chld = as.factor(num_chld)) %>%
+  summarise("zero" = sum(num_chld == "0"), "one" = sum(num_chld == "1"), "two" = sum(num_chld == "2"), "three" = sum(num_chld == "3"), "four" = sum(num_chld == "4"), "five" = sum(num_chld == "5")) %>%
+  gather(key = "num", val = "total", zero, one, two , three, four, five)
+
+none = paste0(round((child_data$total[child_data$num == "zero"]/sum(child_data$total)) * 100), "%")
 ```
 
 ```{r}
 # prep demographic data
 
+# set up variables that will be combos of other variables
 demo_data <- all_data %>%
   mutate(IsMentPhysCl = 0, IsMentPhysOp = 0, IsAlcoSubsCl = 0, IsAlcoSubsOp = 0)
 
+# gather mental and physical disabilities into single variable
 demo_data$IsMentPhysCl[demo_data$IsMentCl == 1 | demo_data$IsPhysCl == 1] <- 1
 demo_data$IsMentPhysOp[demo_data$IsMentOP == 1 | demo_data$IsPhysOP == 1] <- 1
 demo_data$IsAlcoSubsCl[demo_data$IsAlcoCl == 1 | demo_data$IsSubsCl == 1] <- 1
 demo_data$IsAlcoSubsOp[demo_data$IsAlcoOP == 1 | demo_data$IsSubsOP == 1] <- 1
 
+# make the filing status column easier to work with since this will be column names
 demo_data$filingstatus3[demo_data$filingstatus3 == "Spouse filed, client does not want divorce" | demo_data$filingstatus3 == "Spouse filed, client wants divorce"] <- "spouse_filed"
 demo_data$filingstatus3[demo_data$filingstatus3 == "Nothing filed, client wants divorce"] <- "none_filed"
 
+# make the house hold language variable 0 or 1
 demo_data$LangHH[demo_data$LangHH != "English"] <- 0
 demo_data$LangHH[demo_data$LangHH == "English"] <- 1
 
+# gather all the data into variable and value column
 demo_data <- demo_data %>%
   select(filingstatus3, legaiddiv, IsInterpCl, IsFemCl, age, IsBlaCl, IsHisCl, IsWhiCl,
          IsOthAsiCl, LangHH, IsMentPhysCl, IsMentPhysOp,
@@ -83,12 +107,15 @@ demo_data <- demo_data %>%
 
 income <- all_data
 
+# making filing status nice for column title
 income$filingstatus3[income$filingstatus3 == "Spouse filed, client does not want divorce" | income$filingstatus3 == "Spouse filed, client wants divorce"] <- "spouse_filed"
 income$filingstatus3[income$filingstatus3 == "Nothing filed, client wants divorce"] <- "none_filed"
 
+# make medical insurance primary holder variable 0 or 1 
 income$MedInsPrimHold[income$MedInsPrimHold == "Client"] <- 1
 income$MedInsPrimHold[income$MedInsPrimHold == "Other" | income$MedInsPrimHold == "Opposing Spouse" | income$MedInsPrimHold == ".n"] <- 0
 
+# gather into variable and value column
 income <- income %>%
   select(filingstatus3, legaiddiv, IsInterpCl, IsEmplCl, IsEmplOP, MonthWageCl, AmtMnthIncOP, IsFdStmpCl, IsSSIOrSSDICl, IsTANFCl, IsOthIncCl, IsPensSoleCl, IsPensSoleOP, IsMedInsCl, MedInsPrimHold) %>%
   gather(key = "var", value = "val", IsEmplCl, IsEmplOP, MonthWageCl, AmtMnthIncOP, IsFdStmpCl, IsSSIOrSSDICl, IsTANFCl, IsOthIncCl, IsPensSoleCl, IsPensSoleOP, IsMedInsCl, MedInsPrimHold) %>%
@@ -101,9 +128,11 @@ income <- income %>%
 
 marr <- all_data
 
+# make filing status nice
 marr$filingstatus3[marr$filingstatus3 == "Spouse filed, client does not want divorce" | marr$filingstatus3 == "Spouse filed, client wants divorce"] <- "spouse_filed"
 marr$filingstatus3[marr$filingstatus3 == "Nothing filed, client wants divorce"] <- "none_filed"
 
+# gather marriage vars into variable and value column
 marr <- marr %>%
   select(filingstatus3, legaiddiv, IsInterpCl, lengthmar, IsOPInClHm, prevdiv, IsBenSpSupPhCnty, IsClWntSpSup, IsOPEconCla, IsPFAAgstCl, IsPFAProtCl, IsPFAAgstOP, IsGrndDiv2Yr, IsGrndDivMutCon, IsGrndDivDese, IsGrnDivInd, IsGrnDivOth) %>%
   gather(key = "var", value = "val", lengthmar, IsOPInClHm, prevdiv, IsBenSpSupPhCnty, IsClWntSpSup, IsOPEconCla, IsPFAAgstCl, IsPFAProtCl, IsPFAAgstOP, IsGrndDiv2Yr, IsGrndDivMutCon, IsGrndDivDese, IsGrnDivInd, IsGrnDivOth) %>%
@@ -116,9 +145,11 @@ marr <- marr %>%
 
 fam <- all_data
 
+# make filing status nice
 fam$filingstatus3[fam$filingstatus3 == "Spouse filed, client does not want divorce" | fam$filingstatus3 == "Spouse filed, client wants divorce"] <- "spouse_filed"
 fam$filingstatus3[fam$filingstatus3 == "Nothing filed, client wants divorce"] <- "none_filed"
 
+# gather family vars into variable and value column
 fam <- fam %>%
   select(filingstatus3, legaiddiv, IsInterpCl, num_chld, chldmar, chldmar18, chldmar18cust, chldmar18supp) %>%
   gather(key = "var", value = "val", num_chld, chldmar, chldmar18, chldmar18cust, chldmar18supp) %>%
@@ -130,6 +161,8 @@ fam <- fam %>%
 # prep asset data
 asset <- all_data %>%
   mutate(ClOwnREH = 0, OwnREH = 0, DesREH = 0, OwnAuto = 0, ClOwnAuto = 0, DesAuto = 0, OwnPenAnn = 0, DesPenAnn = 0, OwnBkAcct = 0, OwnBus = 0, OwnCC = 0, OwnLoan = 0)
+
+# make filing status pretty
 
 asset$filingstatus3[asset$filingstatus3 == "Spouse filed, client does not want divorce" | asset$filingstatus3 == "Spouse filed, client wants divorce"] <- "spouse_filed"
 asset$filingstatus3[asset$filingstatus3 == "Nothing filed, client wants divorce"] <- "none_filed"
@@ -146,39 +179,48 @@ asset$OwnREH[asset$IsREH1 == 1] <- 1
 asset$OwnAuto[asset$IsAuto1 == 1] <- 1
 
 # cl has sole or joint own of auto
+
 asset$ClOwnAuto[asset$OwnAuto1 == "Joint" | asset$OwnAuto1 == "Client alone" | asset$OwnAuto2 == "Joint" | asset$OwnAuto2 == "Client alone" | asset$OwnAuto3 == "Joint" | asset$OwnAuto3 == "Client alone"] <- 1
 
 # client or spouse has pension/annuity
+
 asset$OwnPenAnn[asset$IsPenAnn1 == 1] <- 1
 
 # client or spouse has bank account
+
 asset$OwnBkAcct[asset$IsBkAcct1 == 1] <- 1
 
 # client or spouse has business
+
 asset$OwnBus[asset$num_Bus != 0] <- 1
 
 # client or spouse has credit card
 asset$OwnCC[asset$num_CC != 0] <- 1
 
 # client or spouse has loan
+
 asset$OwnLoan[asset$num_Loan != 0] <- 1
 
+# gather asset data into variable and value columns
 asset <- asset %>%
   select(filingstatus3, legaiddiv, IsInterpCl, clownasset, OwnREH, num_REH, ClOwnREH, desshareREH, OwnAuto,num_Auto, ClOwnAuto, desshareAuto, OwnPenAnn, num_PenAnn, clownPenAnn, dessharePenAnn, OwnBkAcct, num_BkAcct, clownBkAcct, desshareBkAcct, OwnBus, num_Bus, clownBus, desshareBus, OwnCC, num_CC, clownCC, desOPCC, OwnLoan, num_Loan, clownLoan, desOPLoan) %>%
   gather(key = "var", value = "val", clownasset, OwnREH, num_REH, ClOwnREH, desshareREH, OwnAuto, num_Auto, ClOwnAuto, desshareAuto, OwnPenAnn, num_PenAnn, clownPenAnn, dessharePenAnn, OwnBkAcct, num_BkAcct, clownBkAcct, desshareBkAcct, OwnBus, num_Bus, clownBus, desshareBus, OwnCC, num_CC, clownCC, desOPCC, OwnLoan, num_Loan, clownLoan, desOPLoan) %>%
   mutate(val = as.numeric(val)) %>%
   mutate(type = "Asset")
 
-# combine tables
+# combine the demo, income, marriage, family, and asset tables
 
 table_data <- asset %>%
   merge(income, all = TRUE) %>%
   merge(demo_data, all = TRUE) %>%
   merge(marr, all = TRUE) %>%
   merge(fam, all = TRUE) %>%
+  # set up different columsn for pvalues
   mutate(filing_p_val = 0, legaiddiv_p_val = 0, interp_p_val = 0)
 
 var_names <- unique(table_data$var)
+
+# calculate p values comparing across filing status
 
 i <- 1
 
@@ -186,17 +228,22 @@ for(i in 1:length(var_names)) {
   table_data$filing_p_val[table_data$var == var_names[i]] <- t.test(table_data$val[table_data$var == var_names[i]] ~ table_data$filingstatus3[table_data$var == var_names[i]], conf.level = 0.95)$p.value
 }
 
+# calculate p values comparing across legal aid division status
+
 i <- 1
 
 for(i in 1:length(var_names)) {
   table_data$legaiddiv_p_val[table_data$var == var_names[i]] <- t.test(table_data$val[table_data$var == var_names[i]] ~ table_data$legaiddiv[table_data$var == var_names[i]], conf.level = 0.95)$p.value
 }
 
+# calculate p values comparing across interpreter or not
+
 for(i in 1:length(var_names)) {
   table_data$interp_p_val[table_data$var == var_names[i]] <- t.test(table_data$val[table_data$var == var_names[i]] ~ table_data$IsInterpCl[table_data$var == var_names[i]], conf.level = 0.95)$p.value
 }
 
-# get p values and stuff
+# prepare table with means, mean difference, and p value across filing status, legal aid division, and interpreter. I already did it with just filing data when i decided to do the other ones too and i figured it was easier to just copy the code and change the variables and then combine than to try to change the code to do all of the comparisons at once
+
 filing_data <-table_data %>%
   group_by(filingstatus3, var, filing_p_val, type) %>%
   summarise(mean = mean(val, na.rm = TRUE), sd = sd(val, na.rm = TRUE)) %>%
@@ -268,7 +315,9 @@ table_data <- filing_data %>%
 ```
 
 ```{r}
-# make demo variables pretty for table
+
+# make variables nice for table, because this is what's getting presented. probably there's a prettier way how to do this, but i just went ahead and hard coded all the changes in because eh it works
+
 table_data$var[table_data$var == "IsFemCl"] <- "Female"
 table_data$var[table_data$var == "age"] <- "Age"
 table_data$var[table_data$var == "IsBlaCl"] <- "Black/African-American"
@@ -356,6 +405,7 @@ table_data <- table_data %>%
   mutate(var = as.factor(var)) %>%
   mutate(var = fct_relevel(var, c("Female", "Age", "Black/African-American", "Hispanic/Latino/of Spanish origin", "White/Caucasian", "Other Race", "English primarily spoken in marital home", "Client has history of mental or physical disability", "Spouse has history of mental or physical disability","Client has history of alcohol or substance abuse", "Spouse has history of alcohol or substance abuse", "Client has criminal record", "Spouse has criminal record", "Client Employed", "Spouse employed", "Client's monthly employment income", "Spouse's monthly employment income", "Food stamps", "SSI or SSDI", "TANF or other welfare", "Other income", "Client has pension solely in his/her name", "Spouse has pension solely in his/her name", "Client has health insurance", "Client is policyholder of client's health insurance", "Client has sole or joint ownership of any asset", "Client or Spouse has real estate/home", "Number of real estate holdings/houses owned by Client or Spouse", "Client has sole or joint ownership of real estate/house", "Client wants sole/partial ownership of real estate/house", "Client or Spouse has automobile","Number of automobiles owned by Client or Spouse", "Client has sole or joint ownership of automobile", "Client wants sole/partial ownership of automobile", "Client or Spouse has pension/annuity", "Number of pensions/annuities owned by Client or Spouse", "Client has sole or joint ownership of pension/annuity", "Client wants sole/partial ownership of pension/annuity", "Client or Spouse has bank account", "Number of bank accounts owned by Client or Spouse", "Client has sole or joint ownership of bank account", "Client wants sole/partial ownership of bank account", "Client or Spouse has business", "Number of businesses owned by Client or Spouse", "Client has sole or joint ownership of business", "Client wants sole/partial ownership of business", "Client or Spouse has credit card", "Number of credit cards owned by Client or Spouse", "Client has sole or joint ownership of credit card", "Client wants spouse to own credit card debt", "Client or Spouse has loan", "Number of loans owned by Client or Spouse", "Client has sole or joint ownership of loan", "Client wants spouse to own loan debt", "Years of marriage", "Spouse currently lives in client's home", "Client is previously divorced", "Client is current beneficiary of spousal support order", "Client wants spousal support", "Spouse is making economic claims", "Client has had PFA order entered against him/her", "Client has had PFA order entered protecting him/her", "Spouse has had PFA order entered against him/her", "Grounds for divorce: 2-year separation", "Grounds for divorce: mutual consent", "Grounds for divorce: desertion", "Grounds for divorce: indignities", "Grounds for divorce: other", "Number of children of either spouse", "Client has child of marriage", "Client has child of marriage under 18", "Client desires custody over child of marriage under 18", "Client desires child support for child of marriage under 18"))) %>%
   arrange(var) %>%
+  # make sure the data is numeric
   mutate(none_filed = as.numeric(none_filed), spouse_filed = as.numeric(spouse_filed), yes_interp = as.numeric(yes_interp), no_interp = as.numeric(no_interp), post = as.numeric(post), pre = as.numeric(pre))
 ```
 

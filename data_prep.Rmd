@@ -41,15 +41,17 @@ marr_data <- all_data %>%
   
 # get a table with percentages of races
 race_data <- all_data %>%
-  # get total
-  mutate(total = sum(IsBlaCl + IsWhiCl + IsHisCl + IsAsiCl + IsOthCl)) %>%
   # subtracting 2 from white clients due to 2 people marking both white and hispanic - counting white hispanics as just hispanic
-  summarize(Black = sum((IsBlaCl)), White = (sum(IsWhiCl) - 2), Hispanic = sum(IsHisCl), Asian = sum(IsAsiCl), Other = sum(IsOthCl), total = mean(total)) %>%
+  summarize(Black = sum((IsBlaCl)), White = (sum(IsWhiCl) - 2), Hispanic = sum(IsHisCl), Asian = sum(IsAsiCl), Other = sum(IsOthCl)) %>%
   # gather it
   gather(key = "race", "value" = n, Black, White, Hispanic, Asian, Other) %>%
   # make into percent
-  mutate(n = paste0(round((n / total) * 100, digits = 2), "%")) %>%
   select(race, n)
+
+total = sum(race_data$n)
+
+pct_blck = paste0(round((race_data$n[race_data$race == "Black"] / total) * 100, digits = 2), "%")
+
 
 # get all the clients who are getting benefits and sum
 ben_data <- all_data %>%
@@ -68,7 +70,7 @@ child_data <- all_data %>%
   summarise("zero" = sum(num_chld == "0"), "one" = sum(num_chld == "1"), "two" = sum(num_chld == "2"), "three" = sum(num_chld == "3"), "four" = sum(num_chld == "4"), "five" = sum(num_chld == "5")) %>%
   gather(key = "num", val = "total", zero, one, two , three, four, five)
 
-none = paste0(round((child_data$total[child_data$num == "zero"]/sum(child_data$total)) * 100), "%")
+none = paste0(round((child_data$total[child_data$num == "zero"]/sum(child_data$total)) * 100, digits = 2), "%")
 ```
 
 ```{r}

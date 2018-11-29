@@ -68,8 +68,8 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                mainPanel(
                  h2("Race"),
                  # static table with race percentages, not sure there's anything too interesting here
-                 h5("The percentage of participants belonging to each racial category is displayed below."),
-                 tableOutput("raceTable"),
+                 h5("The percentage of participants belonging to each racial category is displayed below.", pct_blck, "of clients were black."),
+                 plotOutput("racePlot"),
                  h2("Age"),
                  # age histogram
                  h5("Below is a histogram of participant's ages."),
@@ -271,11 +271,11 @@ server <- function(input, output) {
   })
    
   # race histogram
-  output$raceTable <- function () {
-    race_data %>%
-      knitr::kable("html", col.names = c("Race", "Percent")) %>%
-      kable_styling("striped", full_width = F)
-  }
+  output$racePlot = renderPlot ({
+    barplot(height = race_data$n,
+            names.arg = race_data$race
+    )
+  })
    
   # age histogram
   output$agePlot <- renderPlot({
@@ -300,7 +300,7 @@ server <- function(input, output) {
   # child bar graph
   output$childPlot = renderPlot ({
     barplot(height = child_data$total,
-            names.arg = c("0", "1", "2", "3", "4", "5"),
+            names.arg = c("0", "1", "2", "3", "4", "5")
     )
   })
   

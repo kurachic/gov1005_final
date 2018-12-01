@@ -18,59 +18,6 @@ library(knitr)
 # load data
 all_data <- read_csv("gov1005_final_app/Data/philly_vars.csv")
 
-# prepare mini table with just stuff about wages
-wage_data <- all_data %>%
-  filter(!is.na(MonthWageCl), MonthWageCl != 0, !is.na(AmtMnthIncOP), AmtMnthIncOP != 0, AmtMnthIncOP <= 15000) 
-
-# figure out how many clients are unemployed
-number_zero_cl <- all_data %>%
-  select(RefNum, MonthWageCl) %>%
-  filter(MonthWageCl == 0) %>%
-  count(MonthWageCl)
-
-# figure out how many opposition are unemployed
-number_zero_op <- all_data %>%
-  select(RefNum, AmtMnthIncOP) %>%
-  filter(AmtMnthIncOP == 0) %>%
-  count(AmtMnthIncOP)
-
-# mini table with just length of marriage
-marr_data <- all_data %>%
-  select(lengthmar) %>%
-  filter(! is.na(lengthmar))
-  
-# get a table with percentages of races
-race_data <- all_data %>%
-  # subtracting 2 from white clients due to 2 people marking both white and hispanic - counting white hispanics as just hispanic
-  summarize(Black = sum((IsBlaCl)), White = (sum(IsWhiCl) - 2), Hispanic = sum(IsHisCl), Asian = sum(IsAsiCl), Other = sum(IsOthCl)) %>%
-  # gather it
-  gather(key = "race", "value" = n, Black, White, Hispanic, Asian, Other) %>%
-  # make into percent
-  select(race, n)
-
-total = sum(race_data$n)
-
-pct_blck = paste0(round((race_data$n[race_data$race == "Black"] / total) * 100, digits = 2), "%")
-
-
-# get all the clients who are getting benefits and sum
-ben_data <- all_data %>%
-  filter(IsBenSpSupCl == 1 | IsTANFCl == 1 | IsSSIOrSSDICl == 1 | IsSSCl == 1 | IsOthRetCl == 1 | IsUnempCl == 1 | IsFdStmpCl == 1 | IsOthIncCl == 1) %>%
-  summarize(n = n())
-
-# get all the data on domestic abuse
-dom_abuse <- all_data %>%
-  select(IsPFAAgstCl, DatePFAAgstCl, IsPFAAgstClPhCnty, IsPFAAgstClStillEff, IsPFAProtCl, DatePFAProtCl, IsPFAProtClPhCnty, IsPFAProtClStillEff, IsPFAAgstOP)
-
-# get data for child bar graph
-
-child_data <- all_data %>%
-  select(num_chld) %>%
-  mutate(num_chld = as.factor(num_chld)) %>%
-  summarise("zero" = sum(num_chld == "0"), "one" = sum(num_chld == "1"), "two" = sum(num_chld == "2"), "three" = sum(num_chld == "3"), "four" = sum(num_chld == "4"), "five" = sum(num_chld == "5")) %>%
-  gather(key = "num", val = "total", zero, one, two , three, four, five)
-
-none = paste0(round((child_data$total[child_data$num == "zero"]/sum(child_data$total)) * 100, digits = 2), "%")
 ```
 
 ```{r}
@@ -209,6 +156,9 @@ asset <- asset %>%
   gather(key = "var", value = "val", clownasset, OwnREH, num_REH, ClOwnREH, desshareREH, OwnAuto, num_Auto, ClOwnAuto, desshareAuto, OwnPenAnn, num_PenAnn, clownPenAnn, dessharePenAnn, OwnBkAcct, num_BkAcct, clownBkAcct, desshareBkAcct, OwnBus, num_Bus, clownBus, desshareBus, OwnCC, num_CC, clownCC, desOPCC, OwnLoan, num_Loan, clownLoan, desOPLoan) %>%
   mutate(val = as.numeric(val)) %>%
   mutate(type = "Asset")
+
+# create separate table for asset tab
+asset_tab <- asset
 
 # combine the demo, income, marriage, family, and asset tables
 
@@ -409,5 +359,70 @@ table_data <- table_data %>%
   arrange(var) %>%
   # make sure the data is numeric
   mutate(none_filed = as.numeric(none_filed), spouse_filed = as.numeric(spouse_filed), yes_interp = as.numeric(yes_interp), no_interp = as.numeric(no_interp), post = as.numeric(post), pre = as.numeric(pre))
+```
+
+```{r}
+# prepare mini table with just stuff about wages
+wage_data <- all_data %>%
+  filter(!is.na(MonthWageCl), MonthWageCl != 0, !is.na(AmtMnthIncOP), AmtMnthIncOP != 0, AmtMnthIncOP <= 15000) 
+
+# figure out how many clients are unemployed
+number_zero_cl <- all_data %>%
+  select(RefNum, MonthWageCl) %>%
+  filter(MonthWageCl == 0) %>%
+  count(MonthWageCl)
+
+# figure out how many opposition are unemployed
+number_zero_op <- all_data %>%
+  select(RefNum, AmtMnthIncOP) %>%
+  filter(AmtMnthIncOP == 0) %>%
+  count(AmtMnthIncOP)
+
+# mini table with just length of marriage
+marr_data <- all_data %>%
+  select(lengthmar) %>%
+  filter(! is.na(lengthmar))
+  
+# get a table with percentages of races
+race_data <- all_data %>%
+  # subtracting 2 from white clients due to 2 people marking both white and hispanic - counting white hispanics as just hispanic
+  summarize(Black = sum((IsBlaCl)), White = (sum(IsWhiCl) - 2), Hispanic = sum(IsHisCl), Asian = sum(IsAsiCl), Other = sum(IsOthCl)) %>%
+  # gather it
+  gather(key = "race", "value" = n, Black, White, Hispanic, Asian, Other) %>%
+  # make into percent
+  select(race, n)
+
+total = sum(race_data$n)
+
+pct_blck = paste0(round((race_data$n[race_data$race == "Black"] / total) * 100, digits = 2), "%")
+
+
+# get all the clients who are getting benefits and sum
+ben_data <- all_data %>%
+  filter(IsBenSpSupCl == 1 | IsTANFCl == 1 | IsSSIOrSSDICl == 1 | IsSSCl == 1 | IsOthRetCl == 1 | IsUnempCl == 1 | IsFdStmpCl == 1 | IsOthIncCl == 1) %>%
+  summarize(n = n())
+
+# get all the data on domestic abuse
+dom_abuse <- all_data %>%
+  select(IsPFAAgstCl, DatePFAAgstCl, IsPFAAgstClPhCnty, IsPFAAgstClStillEff, IsPFAProtCl, DatePFAProtCl, IsPFAProtClPhCnty, IsPFAProtClStillEff, IsPFAAgstOP)
+
+# get data for child bar graph
+
+child_data <- all_data %>%
+  select(num_chld) %>%
+  mutate(num_chld = as.factor(num_chld)) %>%
+  summarise("zero" = sum(num_chld == "0"), "one" = sum(num_chld == "1"), "two" = sum(num_chld == "2"), "three" = sum(num_chld == "3"), "four" = sum(num_chld == "4"), "five" = sum(num_chld == "5")) %>%
+  gather(key = "num", val = "total", zero, one, two , three, four, five)
+
+# percent w no children
+none = paste0(round((child_data$total[child_data$num == "zero"]/sum(child_data$total)) * 100, digits = 2), "%")
+
+# create separate table for asset tab
+asset_tab <- asset_tab %>%
+  select(var, val) %>%
+  filter(!grepl("num",var)) %>%
+  group_by(var) %>%
+  summarise(n = sum(val))
+
 ```
 

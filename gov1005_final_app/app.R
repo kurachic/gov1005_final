@@ -103,7 +103,8 @@ ui <- fluidPage(theme = shinytheme("yeti"),
     ),
     tabPanel("Assets",
       mainPanel(
-        h2("Assets")
+        h2("Assets"),
+        plotOutput("assetPlot")
       )
     ),
     tabPanel("Marriage",
@@ -272,9 +273,7 @@ server <- function(input, output) {
    
   # race histogram
   output$racePlot = renderPlot ({
-    barplot(height = race_data$n,
-            names.arg = race_data$race
-    )
+    ggplot(race_data, aes(x = race, y = n)) + geom_bar(stat = "identity")
   })
    
   # age histogram
@@ -299,11 +298,15 @@ server <- function(input, output) {
   
   # child bar graph
   output$childPlot = renderPlot ({
-    barplot(height = child_data$total,
-            names.arg = c("0", "1", "2", "3", "4", "5")
-    )
+    ggplot(all_data, aes(x = as.factor(num_chld))) + geom_bar()
+        
   })
   
+  output$assetPlot = renderPlot ({
+    
+    ggplot(asset_tab, aes(x = var, y = n)) + geom_bar(stat = "identity") + 
+      geom_text(data=asset_tab, aes(x=var, y=n+10, label=var), color="black", fontface="bold",alpha=0.6, size=2.5, inherit.aes = FALSE )
+  })
 }
 
 # Run the application 

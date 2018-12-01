@@ -390,7 +390,8 @@ race_data <- all_data %>%
   # gather it
   gather(key = "race", "value" = n, Black, White, Hispanic, Asian, Other) %>%
   # make into percent
-  select(race, n)
+  select(race, n) %>%
+  mutate(race = fct_relevel(race, c("Black", "Hispanic", "White", "Asian", "Other")))
 
 total = sum(race_data$n)
 

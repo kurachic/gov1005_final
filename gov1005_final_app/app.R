@@ -61,11 +61,12 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                tabPanel("ComparisonPlot",
                         sidebarLayout(
                           sidebarPanel(
-                            selectInput(inputId = "comp", label = "Select how to compare:", 
+                            selectInput(inputId = "comps", label = "Select how to compare:", 
                                         choices = c(`PLA divorce practice status` = "legaiddiv_p_val",
                                                     `Divorce filing status` = "filing_p_val",
                                                     `Interpreter` = "interp_p_val",
-                                                    `Treatment` = "trted_p_val"),
+                                                    `Treatment` = "trted_p_val",
+                                                    `Include all` = "all"),
                                         selected = "legaiddiv_p_val"),
                             checkboxGroupInput(inputId = "plotvars", label = "Select variables to display:",
                                                choices = table_data$var,
@@ -331,8 +332,13 @@ server <- function(input, output, session) {
     filteredData <- plot_data %>%
       filter(var %in% input$plotvars)
     
+    if (input$comps != "all") {
+      filteredData <- filteredData %>%
+        filter(key == input$comps)
+    }
+    
     if(length(input$plotvars) > 0) {
-      ggplot(plot_data, aes(x=value, y = 1)) + geom_jitter() + geom_vline(xintercept = 0.05)
+      ggplot(filteredData, aes(x=value, y = 1, col = key)) + geom_jitter() + geom_vline(xintercept = 0.05)
     }
     else {
       h5()

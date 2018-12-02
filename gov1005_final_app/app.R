@@ -399,7 +399,7 @@ server <- function(input, output, session) {
   })
   
   output$assetPlot = renderPlot ({
-    ggplot(asset_tab, aes(x = var, y = n)) + geom_bar(stat = "identity")
+    ggplot(asset_tab, aes(x = var, y = n)) + geom_bar(stat = "identity") + coord_flip()
   })
   
 }

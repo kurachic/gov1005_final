@@ -157,6 +157,37 @@ asset <- asset %>%
   mutate(val = as.numeric(val)) %>%
   mutate(type = "Asset")
 
+# make asset variables pretty for table
+asset$var[asset$var == "clownasset"] <- "Client has sole or joint ownership of any asset"
+asset$var[asset$var == "OwnREH"] <- "Client or Spouse has real estate/home"
+asset$var[asset$var == "num_REH"] <- "Number of real estate holdings/houses owned by Client or Spouse"
+asset$var[asset$var == "ClOwnREH"] <- "Client has sole or joint ownership of real estate/house"
+asset$var[asset$var == "desshareREH"] <- "Client wants sole/partial ownership of real estate/house"
+asset$var[asset$var == "OwnAuto"] <- "Client or Spouse has automobile"
+asset$var[asset$var == "num_Auto"] <- "Number of automobiles owned by Client or Spouse"
+asset$var[asset$var == "ClOwnAuto"] <- "Client has sole or joint ownership of automobile"
+asset$var[asset$var == "desshareAuto"] <- "Client wants sole/partial ownership of automobile"
+asset$var[asset$var == "OwnPenAnn"] <- "Client or Spouse has pension/annuity"
+asset$var[asset$var == "num_PenAnn"] <- "Number of pensions/annuities owned by Client or Spouse"
+asset$var[asset$var == "clownPenAnn"] <- "Client has sole or joint ownership of pension/annuity"
+asset$var[asset$var == "dessharePenAnn"] <- "Client wants sole/partial ownership of pension/annuity"
+asset$var[asset$var == "OwnBkAcct"] <- "Client or Spouse has bank account"
+asset$var[asset$var == "num_BkAcct"] <- "Number of bank accounts owned by Client or Spouse"
+asset$var[asset$var == "clownBkAcct"] <- "Client has sole or joint ownership of bank account"
+asset$var[asset$var == "desshareBkAcct"] <- "Client wants sole/partial ownership of bank account"
+asset$var[asset$var == "OwnBus"] <- "Client or Spouse has business"
+asset$var[asset$var == "num_Bus"] <- "Number of businesses owned by Client or Spouse"
+asset$var[asset$var == "clownBus"] <- "Client has sole or joint ownership of business"
+asset$var[asset$var == "desshareBus"] <- "Client wants sole/partial ownership of business"
+asset$var[asset$var == "OwnCC"] <- "Client or Spouse has credit card"
+asset$var[asset$var == "num_CC"] <- "Number of credit cards owned by Client or Spouse"
+asset$var[asset$var == "clownCC"] <- "Client has sole or joint ownership of credit card"
+asset$var[asset$var == "desOPCC"] <- "Client wants spouse to own credit card debt"
+asset$var[asset$var == "OwnLoan"] <- "Client or Spouse has loan"
+asset$var[asset$var == "num_Loan"] <- "Number of loans owned by Client or Spouse"
+asset$var[asset$var == "clownLoan"] <- "Client has sole or joint ownership of loan"
+asset$var[asset$var == "desOPLoan"] <- "Client wants spouse to own loan debt"
+
 # create separate table for asset tab
 asset_tab <- asset
 
@@ -328,37 +359,6 @@ table_data$var[table_data$var == "IsPensSoleOP"] <- "Spouse has pension solely i
 table_data$var[table_data$var == "IsMedInsCl"] <- "Client has health insurance"
 table_data$var[table_data$var == "MedInsPrimHold"] <- "Client is policyholder of client's health insurance"
 
-# make asset variables pretty for table
-table_data$var[table_data$var == "clownasset"] <- "Client has sole or joint ownership of any asset"
-table_data$var[table_data$var == "OwnREH"] <- "Client or Spouse has real estate/home"
-table_data$var[table_data$var == "num_REH"] <- "Number of real estate holdings/houses owned by Client or Spouse"
-table_data$var[table_data$var == "ClOwnREH"] <- "Client has sole or joint ownership of real estate/house"
-table_data$var[table_data$var == "desshareREH"] <- "Client wants sole/partial ownership of real estate/house"
-table_data$var[table_data$var == "OwnAuto"] <- "Client or Spouse has automobile"
-table_data$var[table_data$var == "num_Auto"] <- "Number of automobiles owned by Client or Spouse"
-table_data$var[table_data$var == "ClOwnAuto"] <- "Client has sole or joint ownership of automobile"
-table_data$var[table_data$var == "desshareAuto"] <- "Client wants sole/partial ownership of automobile"
-table_data$var[table_data$var == "OwnPenAnn"] <- "Client or Spouse has pension/annuity"
-table_data$var[table_data$var == "num_PenAnn"] <- "Number of pensions/annuities owned by Client or Spouse"
-table_data$var[table_data$var == "clownPenAnn"] <- "Client has sole or joint ownership of pension/annuity"
-table_data$var[table_data$var == "dessharePenAnn"] <- "Client wants sole/partial ownership of pension/annuity"
-table_data$var[table_data$var == "OwnBkAcct"] <- "Client or Spouse has bank account"
-table_data$var[table_data$var == "num_BkAcct"] <- "Number of bank accounts owned by Client or Spouse"
-table_data$var[table_data$var == "clownBkAcct"] <- "Client has sole or joint ownership of bank account"
-table_data$var[table_data$var == "desshareBkAcct"] <- "Client wants sole/partial ownership of bank account"
-table_data$var[table_data$var == "OwnBus"] <- "Client or Spouse has business"
-table_data$var[table_data$var == "num_Bus"] <- "Number of businesses owned by Client or Spouse"
-table_data$var[table_data$var == "clownBus"] <- "Client has sole or joint ownership of business"
-table_data$var[table_data$var == "desshareBus"] <- "Client wants sole/partial ownership of business"
-table_data$var[table_data$var == "OwnCC"] <- "Client or Spouse has credit card"
-table_data$var[table_data$var == "num_CC"] <- "Number of credit cards owned by Client or Spouse"
-table_data$var[table_data$var == "clownCC"] <- "Client has sole or joint ownership of credit card"
-table_data$var[table_data$var == "desOPCC"] <- "Client wants spouse to own credit card debt"
-table_data$var[table_data$var == "OwnLoan"] <- "Client or Spouse has loan"
-table_data$var[table_data$var == "num_Loan"] <- "Number of loans owned by Client or Spouse"
-table_data$var[table_data$var == "clownLoan"] <- "Client has sole or joint ownership of loan"
-table_data$var[table_data$var == "desOPLoan"] <- "Client wants spouse to own loan debt"
-
 # make marriage variables pretty for table
 table_data$var[table_data$var == "lengthmar"] <- "Years of marriage"
 table_data$var[table_data$var == "IsOPInClHm"] <- "Spouse currently lives in client's home"
@@ -459,9 +459,14 @@ none = paste0(round((child_data$total[child_data$num == "zero"]/sum(child_data$t
 # create separate table for asset tab
 asset_tab <- asset_tab %>%
   select(var, val) %>%
-  filter(!grepl("num",var)) %>%
+  filter(!grepl("Number",var)) %>%
   group_by(var) %>%
-  summarise(n = sum(val))
+  summarise(n = sum(val)) %>%
+  mutate(var = as.factor(var)) %>%
+  mutate(var = fct_relevel(var, c("Client has sole or joint ownership of any asset", "Client or Spouse has real estate/home", "Client has sole or joint ownership of real estate/house", "Client wants sole/partial ownership of real estate/house", "Client or Spouse has automobile", "Client has sole or joint ownership of automobile", "Client wants sole/partial ownership of automobile", "Client or Spouse has pension/annuity", "Client has sole or joint ownership of pension/annuity", "Client wants sole/partial ownership of pension/annuity", "Client or Spouse has bank account", "Client has sole or joint ownership of bank account", "Client wants sole/partial ownership of bank account", "Client or Spouse has business", "Client has sole or joint ownership of business", "Client wants sole/partial ownership of business", "Client or Spouse has credit card", "Client has sole or joint ownership of credit card", "Client wants spouse to own credit card debt", "Client or Spouse has loan", "Client has sole or joint ownership of loan", "Client wants spouse to own loan debt"))) %>%
+  arrange(desc(var))
+  
+
 
 ```
 

@@ -20,40 +20,64 @@ ui <- fluidPage(theme = shinytheme("yeti"),
   tabsetPanel(
     # summary tab gives p values produced by t-tests
     tabPanel("Summary",
-             sidebarLayout(
-               sidebarPanel(
-                 # allow users to only show rows where theres a significant difference
-                 checkboxInput(inputId = "signif", label = "Significant Differences Only", value = FALSE),
-                 # allow users to compare the variable to compare across
-                 selectInput(inputId = "comp", label = "Select how to compare:", 
-                             choices = c(`PLA divorce practice status` = "pla",
-                                         `Divorce filing status` = "fs",
-                                         `Interpreter` = "int"),
-                             selected = "pla")
+             tabsetPanel(
+               tabPanel("About",
+                        # explanations of what the data is about
+                        h3("What is the Access to Justice Lab?"),
+                        h5("The Access to Justice Lab is a research clinic at Harvard Law School. The Lab runs randomized
+                           control trials in the legal system in order to assess how accessible various components are
+                           to pro se litigants - people without laywers."),
+                        h3("What is the Philadelphia Divorce Study?"),
+                        h5("The Philadelphia Divorce Study randomized people looking for divorce into two groups - having a lawyer,
+                           and not having a lawyer but having self-help materials. The Lab partnered with Philadelphia Legal
+                           Services (PLA) and Philadelphia VIP to offer representation. Approximately a year into the study, budgetary 
+                           restricts resulted in PLA terminating representation for divorce cases other than those
+                           involving domestic violence or other special circumstances, resulting in increased referrals to 
+                           Philadelphia VIP."),
+                        h3("The Data"),
+                        h5("The data here includes all 378 people who went through a 45 minute intake interview.
+                           67 of these people were ultimately excluded from the study because their spouse had already filed for
+                           divorce. For the purposes of this project, these people have been included in order to examine
+                           the demographic and other information collected in the interview.")
                ),
-               mainPanel(
-                 # explanations of what the data is about
-                 h3("What is the Access to Justice Lab?"),
-                 h5("The Access to Justice Lab is a research clinic at Harvard Law School. The Lab runs randomized
-                    control trials in the legal system in order to assess how accessible various components are
-                    to pro se litigants - people without laywers."),
-                 h3("What is the Philadelphia Divorce Study?"),
-                 h5("The Philadelphia Divorce Study randomized people looking for divorce into two groups - having a lawyer,
-                    and not having a lawyer but having self-help materials. The Lab partnered with Philadelphia Legal
-                    Services (PLA) and Philadelphia VIP to offer representation. Approximately a year into the study, budgetary 
-                    restricts resulted in PLA terminating representation for divorce cases other than those
-                    involving domestic violence or other special circumstances, resulting in increased referrals to 
-                    Philadelphia VIP."),
-                 h3("The Data"),
-                 h5("The data here includes all 378 people who went through a 45 minute intake interview.
-                    67 of these people were ultimately excluded from the study because their spouse had already filed for
-                    divorce. For the purposes of this project, these people have been included in order to examine
-                    the demographic and other information collected in the interview."),
-                 br(),
-                 tableOutput("mainTable")
-               )
+               tabPanel("Comparison Table",
+                 sidebarLayout(
+                   sidebarPanel(
+                     # allow users to only show rows where theres a significant difference
+                     checkboxInput(inputId = "signif", label = "Significant Differences Only", value = FALSE),
+                     # allow users to compare the variable to compare across
+                     selectInput(inputId = "comp", label = "Select how to compare:", 
+                                 choices = c(`PLA divorce practice status` = "pla",
+                                             `Divorce filing status` = "fs",
+                                             `Interpreter` = "int",
+                                             `Treatment` = "trt"),
+                                 selected = "pla")
+                   ),
+                   mainPanel(
+                     tableOutput("mainTable")
+                     )
+                  )
+               ),
+               tabPanel("ComparisonPlot",
+                        sidebarLayout(
+                          sidebarPanel(
+                            selectInput(inputId = "comp", label = "Select how to compare:", 
+                                        choices = c(`PLA divorce practice status` = "legaiddiv_p_val",
+                                                    `Divorce filing status` = "filing_p_val",
+                                                    `Interpreter` = "interp_p_val",
+                                                    `Treatment` = "trted_p_val"),
+                                        selected = "legaiddiv_p_val"),
+                            checkboxGroupInput(inputId = "plotvars", label = "Select variables to display:",
+                                               choices = table_data$var,
+                                               selected = table_data$var),
+                            actionButton("selectall", label="Select/Deselect all")
+                          ),
+                          mainPanel(
+                            plotOutput("mainPlot")
+                          )
+                        )
+                )
              )
-             
     ),
     tabPanel("Demographics", 
              sidebarLayout(
@@ -136,8 +160,24 @@ ui <- fluidPage(theme = shinytheme("yeti"),
 )
 
 # Define server logic
-server <- function(input, output) {
+server <- function(input, output, session) {
   
+  observe({
+    if (input$selectall > 0) {
+      if (input$selectall %% 2 == 0){
+        updateCheckboxGroupInput(session=session, 
+                                 inputId="plotvars",
+                                 choices = table_data$var,
+                                 selected = table_data$var)
+        
+      } else {
+        updateCheckboxGroupInput(session=session, 
+                                 inputId="plotvars",
+                                 choices = table_data$var,
+                                 selected = c())
+        
+      }}
+  })
   # this is a funky chunk of nested if statements because for some fo them if i tried to
   # do if else or whatever it would only look at the very last one i.e. only one
   # of 3 options would actually result in the table displayed
@@ -249,9 +289,55 @@ server <- function(input, output) {
                              has been removed because there are no clients who are the payee of a spousal support order."))
           }
         }
+        else {
+          if (input$comp == "trt") {
+            filteredData <- table_data %>%
+              mutate(p_val = trted_p_val) %>%
+              select(var, no_trted, yes_trted, mean_diff_trted, p_val)
+            columnnames <- c("Variable", "Control", "Experimental", "Mean Difference", "P Value")
+            
+            if(input$signif == FALSE) {
+              filteredData %>%
+                knitr::kable("html", col.names = columnnames) %>%
+                kable_styling("striped", full_width = F) %>%
+                group_rows("Demographics", start_row = 1, end_row = 13) %>%
+                group_rows("Income", start_row = 14, end_row = 25) %>%
+                group_rows("Assets", start_row = 26, end_row = 54) %>%
+                group_rows("Marriage", start_row = 55, end_row = 68) %>%
+                group_rows("Family", start_row = 69, end_row = 73) %>%
+                add_footnote(c("The variable measuring whether the client is the current payee of a spousal support order
+                               has been removed because there are no clients who are the payee of a spousal support order."))
+            }
+            else{
+              filteredData <- filter(filteredData, p_val <= 0.05)
+              filteredData %>%
+                knitr::kable("html", col.names = columnnames) %>%
+                kable_styling("striped", full_width = F) %>%
+                group_rows("Demographics", start_row = 1, end_row = 1) %>%
+                group_rows("Assets", start_row = 2, end_row = 6) %>%
+                group_rows("Marriage", start_row = 7, end_row = 7) %>%
+                add_footnote(c("The variable measuring whether the client is the current payee of a spousal support order
+                               has been removed because there are no clients who are the payee of a spousal support order."))
+            }
+          }
+        }
       }
     }
   }
+  
+  # render the comparison plot
+  
+  output$mainPlot <- renderPlot ({
+    filteredData <- plot_data %>%
+      filter(var %in% input$plotvars)
+    
+    if(length(input$plotvars) > 0) {
+      ggplot(plot_data, aes(x=value, y = 1)) + geom_jitter() + geom_vline(xintercept = 0.05)
+    }
+    else {
+      h5()
+    }
+  })
   
   # wage of client
   output$wagePlotCl <- renderPlot({
@@ -307,6 +393,7 @@ server <- function(input, output) {
     ggplot(asset_tab, aes(x = var, y = n)) + geom_bar(stat = "identity") + 
       geom_text(data=asset_tab, aes(x=var, y=n+10, label=var), color="black", fontface="bold",alpha=0.6, size=2.5, inherit.aes = FALSE )
   })
+  
 }
 
 # Run the application 

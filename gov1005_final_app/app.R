@@ -97,7 +97,7 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                  plotOutput("racePlot"),
                  h2("Age"),
                  # age histogram
-                 h5("Below is a histogram of participant's ages."),
+                 h5(paste0("Below is a histogram of participant's ages. The median age is ", median(all_data$age, na.rm = TRUE), ".")),
                  plotOutput("agePlot")
                )
              )
@@ -115,20 +115,21 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                  # notice participant wages lower than opposition party wages
                  h2("Participant Wages"),
                  # report percent unemployed
-                 h5(paste0(round((number_zero_cl$n / 311) * 100), "%", " of participants are unemployed and do not earn monthly wages. For those participants who do earn monthly wages, a histogram of their wages is presented below")),
+                 h5(paste0(round((number_zero_cl$n / 378) * 100), "%", " of participants are unemployed and do not earn monthly wages. For those participants who do earn monthly wages, a histogram of their wages is presented below")),
                  plotOutput("wagePlotCl"),
                  # report percent on government benefits
-                 h5(paste0(round((ben_data$n / 311) * 100), "%", " have other sources of support, such as welfare, SSI, SSDI, spousal support, unemployment, food stamps, or other benefits.")),
+                 h5(paste0(round((ben_data$n / 378) * 100), "%", " have other sources of support, such as welfare, SSI, SSDI, spousal support, unemployment, food stamps, or other benefits.")),
                  h2("Opposition Party Wages"),
                  # report percent unemployed
-                 h5(paste0(round((number_zero_op$n / 311) * 100), "%", " of opposition parties are unemployed and do not earn monthly wages. Below is a histogram of the opposition party's approximate monthly income.")),
+                 h5(paste0(round((number_zero_op$n / 378) * 100), "%", " of opposition parties are unemployed and do not earn monthly wages. Below is a histogram of the opposition party's approximate monthly income.")),
                  plotOutput("wagePlotOP")
                )
              )
     ),
     tabPanel("Assets",
       mainPanel(
-        h2("Assets"),
+        h5(paste0(round((asset_tab$n[asset_tab$var == "Client has sole or joint ownership of any asset"] / 378) * 100), "%", "of participants
+                  own some asset.")),
         plotOutput("assetPlot")
       )
     ),
@@ -145,12 +146,13 @@ ui <- fluidPage(theme = shinytheme("yeti"),
              mainPanel(
                # some people have been married a whiiiile but most people are around 10 years or less
                h2("Marriage Length"),
-               h5("Below is a histogram of the length of the participants' marriages in years."),
+               h5(paste0("Below is a histogram of the length of the participants' marriages in years. The median marriage length is ", median(marr_data$lengthmar, na.rm = TRUE), ".
+                         ")),
                plotOutput("marrPlot")
              )
       )
     ),
-    tabPanel("Children",
+    tabPanel("Family",
       mainPanel(
         h5("A bar graph of how many children clients have is
            displayed below.",none, "have no children."),
@@ -399,7 +401,15 @@ server <- function(input, output, session) {
   })
   
   output$assetPlot = renderPlot ({
-    ggplot(asset_tab, aes(x = var, y = n)) + geom_bar(stat = "identity") + coord_flip()
+    
+    data <- asset_tab %>%
+      filter(var != "Client has sole or joint ownership of any asset")
+    
+    ggplot(data, aes(group, n)) + geom_bar(aes(fill = type), 
+                                                  width = 0.4, position = position_dodge(width=0.5), stat="identity") +  
+      theme(legend.position="top", legend.title = 
+              element_blank(),axis.title.x=element_blank(), 
+            axis.title.y=element_blank()) + coord_flip()
   })
   
 }

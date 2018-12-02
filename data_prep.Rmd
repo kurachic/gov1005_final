@@ -464,9 +464,19 @@ asset_tab <- asset_tab %>%
   summarise(n = sum(val)) %>%
   mutate(var = as.factor(var)) %>%
   mutate(var = fct_relevel(var, c("Client has sole or joint ownership of any asset", "Client or Spouse has real estate/home", "Client has sole or joint ownership of real estate/house", "Client wants sole/partial ownership of real estate/house", "Client or Spouse has automobile", "Client has sole or joint ownership of automobile", "Client wants sole/partial ownership of automobile", "Client or Spouse has pension/annuity", "Client has sole or joint ownership of pension/annuity", "Client wants sole/partial ownership of pension/annuity", "Client or Spouse has bank account", "Client has sole or joint ownership of bank account", "Client wants sole/partial ownership of bank account", "Client or Spouse has business", "Client has sole or joint ownership of business", "Client wants sole/partial ownership of business", "Client or Spouse has credit card", "Client has sole or joint ownership of credit card", "Client wants spouse to own credit card debt", "Client or Spouse has loan", "Client has sole or joint ownership of loan", "Client wants spouse to own loan debt"))) %>%
-  arrange(desc(var))
+  arrange(desc(var)) %>%
+  mutate(group = "", type = "")
   
+asset_tab$group[grepl("real estate", asset_tab$var)] <- "Real Estate"
+asset_tab$group[grepl("automobile", asset_tab$var)] <- "Automobile"
+asset_tab$group[grepl("pension/annuity", asset_tab$var)] <- "Pension/Annuity"
+asset_tab$group[grepl("bank", asset_tab$var)] <- "Bank Account"
+asset_tab$group[grepl("business", asset_tab$var)] <- "Business"
+asset_tab$group[grepl("credit card", asset_tab$var)] <- "Credit Card"
+asset_tab$group[grepl("loan", asset_tab$var)] <- "Loan"
 
-
+asset_tab$type[grepl("has sole or joint", asset_tab$var)] <- "Client has sole or joint ownership"
+asset_tab$type[grepl("Client or Spouse", asset_tab$var)] <- "Client or Spouse owns"
+asset_tab$type[grepl("Client wants", asset_tab$var)] <- "Client wants asset/wants Spouse to own debt"
 ```
 

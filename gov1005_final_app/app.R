@@ -58,7 +58,7 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                      )
                   )
                ),
-               tabPanel("ComparisonPlot",
+               tabPanel("Comparison Plot",
                         sidebarLayout(
                           sidebarPanel(
                             selectInput(inputId = "comps", label = "Select how to compare:", 
@@ -184,6 +184,10 @@ server <- function(input, output, session) {
   # of 3 options would actually result in the table displayed
   # basically im saying there's a reason that these if statements are nested the way
   # they are
+
+  # also the reason that I can't just filter the data is that the grouping of rows needs to
+  # be manually changed. Unless I'm missing some way to do it automatically, but I'm not to my
+  # knowledge
   
   output$mainTable <- function() {
     
@@ -338,7 +342,7 @@ server <- function(input, output, session) {
     }
     
     if(length(input$plotvars) > 0) {
-      ggplot(filteredData, aes(x=value, y = 1, col = key)) + geom_jitter() + geom_vline(xintercept = 0.05)
+      ggplot(filteredData, aes(x=value, y = 1, col = key)) + geom_jitter() + geom_vline(xintercept = 0.05) + labs(x = "P Value", y = "")
     }
     else {
       h5()
@@ -365,7 +369,7 @@ server <- function(input, output, session) {
    
   # race histogram
   output$racePlot = renderPlot ({
-    ggplot(race_data, aes(x = race, y = n)) + geom_bar(stat = "identity")
+    ggplot(race_data, aes(x = race, y = n)) + geom_bar(stat = "identity") + labs(x = "Race", y = "")
   })
    
   # age histogram
@@ -390,14 +394,12 @@ server <- function(input, output, session) {
   
   # child bar graph
   output$childPlot = renderPlot ({
-    ggplot(all_data, aes(x = as.factor(num_chld))) + geom_bar()
+    ggplot(all_data, aes(x = as.factor(num_chld))) + geom_bar() + labs(x = "Number of Children", y = "")
         
   })
   
   output$assetPlot = renderPlot ({
-    
-    ggplot(asset_tab, aes(x = var, y = n)) + geom_bar(stat = "identity") + 
-      geom_text(data=asset_tab, aes(x=var, y=n+10, label=var), color="black", fontface="bold",alpha=0.6, size=2.5, inherit.aes = FALSE )
+    ggplot(asset_tab, aes(x = var, y = n)) + geom_bar(stat = "identity")
   })
   
 }

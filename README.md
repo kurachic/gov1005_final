@@ -27,6 +27,10 @@ After PLA reduced their divorce practice, clients had significantly less assets,
 
 Clients whose spouse had already filed - clients who were ultimately excluded from the study - were more likely to have joint or sole ownership of some asset, be previously divorced, have a Protection from Abuse entered against him/her, and have a spouse making economic claims. Significantly more of their spouses were employed and those spouses had higher incomes and were more likely to be making economic claims against the client.
 
+Clients who required interpreters were more likely to be Hispanic or of a race other than white, black or asian and more likely to speak a language other than English at home. There were less likely to engage in substane abuse and had less pensions/annuities, business, and loans. Their marriages were significantly longer and desertion was less likely to be grounds for divorce while indignities were more likely to be grounds for divorce.
+
+In examining the entire sample, clients were generally unemployed or low income, black, in early middle age, and a substantial percentage were childless.
+
 **Links**
 
 Please see the A2J website for more information on the lab and the study: <http://a2jlab.org/current-projects/smaller-studies/divorce/>

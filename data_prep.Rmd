@@ -16,6 +16,7 @@ library(knitr)
 
 ```{r message = FALSE}
 # load data
+
 all_data <- read_csv("gov1005_final_app/Data/philly_vars.csv")
 
 ```
@@ -24,6 +25,7 @@ all_data <- read_csv("gov1005_final_app/Data/philly_vars.csv")
 # prep demographic data
 
 # set up variables that will be combos of other variables
+
 demo_data <- all_data %>%
   mutate(IsMentPhysCl = 0, IsMentPhysOp = 0, IsAlcoSubsCl = 0, IsAlcoSubsOp = 0)
 
@@ -398,6 +400,8 @@ plot_data <- table_data %>%
   select(var, filing_p_val, legaiddiv_p_val, interp_p_val, trted_p_val) %>%
   gather("key", "value", filing_p_val, legaiddiv_p_val, interp_p_val, trted_p_val)
 
+# change the key to be pretty since it's displayed as the legend on the plot
+
 plot_data$key[plot_data$key == "filing_p_val"] <- "Filing Status"
 plot_data$key[plot_data$key == "legaiddiv_p_val"] <- "PLA Status"
 plot_data$key[plot_data$key == "interp_p_val"] <- "Interpreter"
@@ -472,6 +476,8 @@ asset_tab <- asset_tab %>%
   arrange(desc(var)) %>%
   mutate(group = "", type = "")
   
+# create a group column to organize the bar graph by
+
 asset_tab$group[grepl("real estate", asset_tab$var)] <- "Real Estate"
 asset_tab$group[grepl("automobile", asset_tab$var)] <- "Automobile"
 asset_tab$group[grepl("pension/annuity", asset_tab$var)] <- "Pension/Annuity"
@@ -479,6 +485,8 @@ asset_tab$group[grepl("bank", asset_tab$var)] <- "Bank Account"
 asset_tab$group[grepl("business", asset_tab$var)] <- "Business"
 asset_tab$group[grepl("credit card", asset_tab$var)] <- "Credit Card"
 asset_tab$group[grepl("loan", asset_tab$var)] <- "Loan"
+
+# create a type column to organize each group by
 
 asset_tab$type[grepl("has sole or joint", asset_tab$var)] <- "Client has sole or joint ownership"
 asset_tab$type[grepl("Client or Spouse", asset_tab$var)] <- "Client or Spouse owns"

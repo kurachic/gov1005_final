@@ -1,11 +1,7 @@
 library(shiny)
 library(shinythemes)
-library(DT)
 library(knitr)
 library(kableExtra)
-library(htmlTable)
-library(xtable)
-library(janitor)
 library(tidyverse)
 
 load("Data/workspace.RData")

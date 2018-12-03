@@ -18,7 +18,7 @@ ui <- fluidPage(theme = shinytheme("yeti"),
   
   # tabs
   tabsetPanel(
-    # summary tab gives p values produced by t-tests
+    # summary tab gives summary info, table and plot of p values produced by t-tests
     tabPanel("Summary",
              tabsetPanel(
                tabPanel("About",
@@ -40,6 +40,7 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                            divorce. For the purposes of this project, these people have been included in order to examine
                            the demographic and other information collected in the interview.")
                ),
+               # comparison table with means, mean difference, and p-values of variables
                tabPanel("Comparison Table",
                  sidebarLayout(
                    sidebarPanel(
@@ -58,9 +59,11 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                      )
                   )
                ),
+               # comparison plot displaying jittered plot of p-values
                tabPanel("Comparison Plot",
                         sidebarLayout(
                           sidebarPanel(
+                            # user can select which comparison groups to plot
                             selectInput(inputId = "comps", label = "Select how to compare:", 
                                         choices = c(`PLA divorce practice status` = "PLA Status",
                                                     `Divorce filing status` = "Filing Status",
@@ -68,9 +71,11 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                                                     `Treatment` = "Treatment",
                                                     `Include all` = "all"),
                                         selected = "PLA Status"),
+                            # user can select which variables to plot
                             checkboxGroupInput(inputId = "plotvars", label = "Select variables to display:",
                                                choices = table_data$var,
                                                selected = table_data$var),
+                            # user can easily select or deselect all variables
                             actionButton("selectall", label="Select/Deselect all")
                           ),
                           mainPanel(
@@ -80,6 +85,7 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                 )
              )
     ),
+    # demographics tab with race and age information
     tabPanel("Demographics", 
              sidebarLayout(
                # allow selection of bins
@@ -92,7 +98,7 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                
                mainPanel(
                  h2("Race"),
-                 # static table with race percentages, not sure there's anything too interesting here
+                 # bar graph of race, notice large percentage of black clients
                  h5("The percentage of participants belonging to each racial category is displayed below.", pct_blck, "of clients were black."),
                  plotOutput("racePlot"),
                  h2("Age"),
@@ -127,7 +133,8 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                )
              )
     ),
-    # asset tab with asset plot, grouped by asset type
+    # asset tab with asset plot, grouped by asset type. It's surprising that so many have houses considering
+    # their low incomes.
     tabPanel("Assets",
       mainPanel(
         h5(paste0(round((asset_tab$n[asset_tab$var == "Client has sole or joint ownership of any asset"] / 378) * 100), "%", " of participants
@@ -135,6 +142,7 @@ ui <- fluidPage(theme = shinytheme("yeti"),
         plotOutput("assetPlot")
       )
     ),
+    # marriage tab with histogram of marriage lengths
     tabPanel("Marriage",
              sidebarLayout(
                # allow selection of bins
@@ -154,6 +162,7 @@ ui <- fluidPage(theme = shinytheme("yeti"),
              )
       )
     ),
+    # family tab with graph of number of children each client has
     tabPanel("Family",
       mainPanel(
         h5("A bar graph of how many children clients have is
@@ -166,6 +175,8 @@ ui <- fluidPage(theme = shinytheme("yeti"),
 
 # Define server logic
 server <- function(input, output, session) {
+  
+  # this allows users to select or deselect all variables
   
   observe({
     if (input$selectall > 0) {
@@ -183,6 +194,7 @@ server <- function(input, output, session) {
         
       }}
   })
+  
   # this is a funky chunk of nested if statements because for some fo them if i tried to
   # do if else or whatever it would only look at the very last one i.e. only one
   # of 3 options would actually result in the table displayed
@@ -191,7 +203,7 @@ server <- function(input, output, session) {
 
   # also the reason that I can't just filter the data is that the grouping of rows needs to
   # be manually changed. Unless I'm missing some way to do it automatically, but I'm not to my
-  # knowledge
+  # knowledge.
   
   output$mainTable <- function() {
     
@@ -340,6 +352,7 @@ server <- function(input, output, session) {
     filteredData <- plot_data %>%
       filter(var %in% input$plotvars)
     
+    # it the input is all, no filtering is needed
     if (input$comps != "all") {
       filteredData <- filteredData %>%
         filter(key == input$comps)
@@ -349,6 +362,8 @@ server <- function(input, output, session) {
       ggplot(filteredData, aes(x=value, y = 1, col = key)) + geom_jitter() + geom_vline(xintercept = 0.05) + labs(x = "P Value", y = "", col = "Comparison Group")
     }
     else {
+      # this just results in showing nothing, which is fine. I've found that adding text doesn't show, and I'm
+      # not terribly bothered by that. I just didn't want an error message.
       h5()
     }
   })
@@ -362,7 +377,7 @@ server <- function(input, output, session) {
     hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Participant Wages", xlab = "Wages")
   })
    
-  # wage of opposing party
+  # wage of opposing party. same number of bins as previous for comparative purposes
   output$wagePlotOP <- renderPlot({
     # generate bins based on input$wageBins from ui.R
     x    <- wage_data$AmtMnthIncOP
@@ -386,7 +401,7 @@ server <- function(input, output, session) {
     hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Participant Age", xlab = "Age")
   })
    
-  # marriage histogram
+  # marriage histogram with marriage length
   output$marrPlot = renderPlot({
     # generate bins based on input$marrBins from ui.R
     x    <- marr_data$lengthmar
@@ -396,19 +411,21 @@ server <- function(input, output, session) {
     hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Marriage Length", xlab = "Marriage Length in Years")
   })
   
-  # child bar graph
+  # child bar graph, number of clients with x number of children
   output$childPlot = renderPlot ({
     ggplot(all_data, aes(x = as.factor(num_chld))) + geom_bar() + labs(x = "Number of Children", y = "")
         
   })
   
   output$assetPlot = renderPlot ({
-    
+    # excluding this because this percent is included in the text above the plot
     data <- asset_tab %>%
       filter(var != "Client has sole or joint ownership of any asset")
     
+    # in order to allow easier comparisons between various types of assets, the graph has been organized
+    # by the type of asset. Because the labs are long, the graph has been flipped to be horizontal
     ggplot(data, aes(group, n)) + geom_bar(aes(fill = type), 
-                                                  width = 0.4, position = position_dodge(width=0.5), stat="identity") +  
+      width = 0.4, position = position_dodge(width=0.5), stat="identity") +  
       theme(legend.position="top", legend.title = 
               element_blank(),axis.title.x=element_blank(), 
             axis.title.y=element_blank()) + coord_flip()

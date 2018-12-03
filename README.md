@@ -34,4 +34,5 @@ In examining the entire sample, clients were generally unemployed or low income,
 **Links**
 
 Please see the A2J website for more information on the lab and the study: <http://a2jlab.org/current-projects/smaller-studies/divorce/>
+
 Please find the resultant Shiny app at this link: <https://melissa-gayton.shinyapps.io/gov1005_final_app/>

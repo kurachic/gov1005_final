@@ -397,6 +397,11 @@ table_data <- table_data %>%
 plot_data <- table_data %>%
   select(var, filing_p_val, legaiddiv_p_val, interp_p_val, trted_p_val) %>%
   gather("key", "value", filing_p_val, legaiddiv_p_val, interp_p_val, trted_p_val)
+
+plot_data$key[plot_data$key == "filing_p_val"] <- "Filing Status"
+plot_data$key[plot_data$key == "legaiddiv_p_val"] <- "PLA Status"
+plot_data$key[plot_data$key == "interp_p_val"] <- "Interpreter"
+plot_data$key[plot_data$key == "trted_p_val"] <- "Treatment"
 ```
 
 ```{r}

@@ -62,12 +62,12 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                         sidebarLayout(
                           sidebarPanel(
                             selectInput(inputId = "comps", label = "Select how to compare:", 
-                                        choices = c(`PLA divorce practice status` = "legaiddiv_p_val",
-                                                    `Divorce filing status` = "filing_p_val",
-                                                    `Interpreter` = "interp_p_val",
-                                                    `Treatment` = "trted_p_val",
+                                        choices = c(`PLA divorce practice status` = "PLA Status",
+                                                    `Divorce filing status` = "Filing Status",
+                                                    `Interpreter` = "Interpreter",
+                                                    `Treatment` = "Treatment",
                                                     `Include all` = "all"),
-                                        selected = "legaiddiv_p_val"),
+                                        selected = "PLA Status"),
                             checkboxGroupInput(inputId = "plotvars", label = "Select variables to display:",
                                                choices = table_data$var,
                                                selected = table_data$var),
@@ -102,6 +102,7 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                )
              )
     ),
+    # income tab that includes histograms and summary statistics of client and opposition wages
     tabPanel("Income",
              sidebarLayout(
                sidebarPanel(width = 3, sliderInput("wageBins",
@@ -126,9 +127,10 @@ ui <- fluidPage(theme = shinytheme("yeti"),
                )
              )
     ),
+    # asset tab with asset plot, grouped by asset type
     tabPanel("Assets",
       mainPanel(
-        h5(paste0(round((asset_tab$n[asset_tab$var == "Client has sole or joint ownership of any asset"] / 378) * 100), "%", "of participants
+        h5(paste0(round((asset_tab$n[asset_tab$var == "Client has sole or joint ownership of any asset"] / 378) * 100), "%", " of participants
                   own some asset.")),
         plotOutput("assetPlot")
       )
@@ -344,7 +346,7 @@ server <- function(input, output, session) {
     }
     
     if(length(input$plotvars) > 0) {
-      ggplot(filteredData, aes(x=value, y = 1, col = key)) + geom_jitter() + geom_vline(xintercept = 0.05) + labs(x = "P Value", y = "")
+      ggplot(filteredData, aes(x=value, y = 1, col = key)) + geom_jitter() + geom_vline(xintercept = 0.05) + labs(x = "P Value", y = "", col = "Comparison Group")
     }
     else {
       h5()

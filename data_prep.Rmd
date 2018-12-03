@@ -410,27 +410,32 @@ plot_data$key[plot_data$key == "trted_p_val"] <- "Treatment"
 
 ```{r}
 # prepare mini table with just stuff about wages
+
 wage_data <- all_data %>%
   filter(!is.na(MonthWageCl), MonthWageCl != 0, !is.na(AmtMnthIncOP), AmtMnthIncOP != 0, AmtMnthIncOP <= 15000) 
 
 # figure out how many clients are unemployed
+
 number_zero_cl <- all_data %>%
   select(RefNum, MonthWageCl) %>%
   filter(MonthWageCl == 0) %>%
   count(MonthWageCl)
 
 # figure out how many opposition are unemployed
+
 number_zero_op <- all_data %>%
   select(RefNum, AmtMnthIncOP) %>%
   filter(AmtMnthIncOP == 0) %>%
   count(AmtMnthIncOP)
 
 # mini table with just length of marriage
+
 marr_data <- all_data %>%
   select(lengthmar) %>%
   filter(! is.na(lengthmar))
   
 # get a table with percentages of races
+
 race_data <- all_data %>%
   # subtracting 2 from white clients due to 2 people marking both white and hispanic - counting white hispanics as just hispanic
   summarize(Black = sum((IsBlaCl)), White = (sum(IsWhiCl) - 2), Hispanic = sum(IsHisCl), Asian = sum(IsAsiCl), Other = sum(IsOthCl)) %>%
@@ -440,21 +445,21 @@ race_data <- all_data %>%
   select(race, n) %>%
   mutate(race = fct_relevel(race, c("Black", "Hispanic", "White", "Asian", "Other")))
 
+# calculate percent black and save to var to be displayed. Honestly could have just used the table 
+# thing in hindsight, but this is already here and works.
+
 total = sum(race_data$n)
 
 pct_blck = paste0(round((race_data$n[race_data$race == "Black"] / total) * 100, digits = 2), "%")
 
 
 # get all the clients who are getting benefits and sum
+
 ben_data <- all_data %>%
   filter(IsBenSpSupCl == 1 | IsTANFCl == 1 | IsSSIOrSSDICl == 1 | IsSSCl == 1 | IsOthRetCl == 1 | IsUnempCl == 1 | IsFdStmpCl == 1 | IsOthIncCl == 1) %>%
   summarize(n = n())
 
-# get all the data on domestic abuse
-dom_abuse <- all_data %>%
-  select(IsPFAAgstCl, DatePFAAgstCl, IsPFAAgstClPhCnty, IsPFAAgstClStillEff, IsPFAProtCl, DatePFAProtCl, IsPFAProtClPhCnty, IsPFAProtClStillEff, IsPFAAgstOP)
-
-# get data for child bar graph
+# get data for child bar graph - sum how many people with zero to five children
 
 child_data <- all_data %>%
   select(num_chld) %>%
@@ -465,7 +470,8 @@ child_data <- all_data %>%
 # percent w no children
 none = paste0(round((child_data$total[child_data$num == "zero"]/sum(child_data$total)) * 100, digits = 2), "%")
 
-# create separate table for asset tab
+# create separate table for asset tab plot with var and val columns, add grou pand type also to sort the graph
+
 asset_tab <- asset_tab %>%
   select(var, val) %>%
   filter(!grepl("Number",var)) %>%

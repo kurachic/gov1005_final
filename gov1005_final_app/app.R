@@ -7,13 +7,13 @@ library(tidyverse)
 load("Data/workspace.RData")
 
 # Define UI for application
-ui <- fluidPage(theme = shinytheme("yeti"),
+ui <- fluidPage(theme = shinytheme("flatly"),
    
   # title
   titlePanel("Access to Justice Lab - Philadelphia Divorce Study"),
   
   # tabs
-  tabsetPanel(
+  navbarPage("A2J",
     # summary tab gives summary info, table and plot of p values produced by t-tests
     tabPanel("Summary",
              tabsetPanel(

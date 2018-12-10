@@ -24,7 +24,7 @@ all_data <- read_csv("gov1005_final_app/Data/philly_vars.csv")
 ```{r}
 # prep demographic data
 
-# set up variables that will be combos of other variables
+# set up variables that will be combos of other variables, 0 is default (no), so im changing it to 1 if other variables mean it should be a 1 (yes)
 
 demo_data <- all_data %>%
   mutate(IsMentPhysCl = 0, IsMentPhysOp = 0, IsAlcoSubsCl = 0, IsAlcoSubsOp = 0)
@@ -43,7 +43,7 @@ demo_data$filingstatus3[demo_data$filingstatus3 == "Nothing filed, client wants 
 demo_data$LangHH[demo_data$LangHH != "English"] <- 0
 demo_data$LangHH[demo_data$LangHH == "English"] <- 1
 
-# gather all the data into variable and value column
+# gather all the data into variable and value column. all the other similar tables for income, assets, marriage, and family will have this same format so that they're easy to combine. We're just leaving the actual variable names the same here, though we'll change it later for clarity
 demo_data <- demo_data %>%
   select(filingstatus3, legaiddiv, IsInterpCl, Trted, IsFemCl, age, IsBlaCl, IsHisCl, IsWhiCl,
          IsOthAsiCl, LangHH, IsMentPhysCl, IsMentPhysOp,
@@ -55,6 +55,7 @@ demo_data <- demo_data %>%
 
 ```{r}
 # prep income data
+# this section (and you'll see the asset section, marriage, and family section also) is basically like the demographic section. I'm doing them separately because it's easy to make sure that everything is working right when they're in smaller, more easy to handle tables and then combining them once you know all the variables are as they should be.
 
 income <- all_data
 
@@ -159,7 +160,8 @@ asset <- asset %>%
   mutate(val = as.numeric(val)) %>%
   mutate(type = "Asset")
 
-# make asset variables pretty for table
+# make asset variables pretty for table. This is happening for assets before the other variables because this is going to branch off into a separate table to be used in the asset tab. i probably could have done it without separating them in hindsight, but at the time this was an easier way to handle it. it also decreases the shenanigans that have to happen on the shiny app to get the right data to display.
+
 asset$var[asset$var == "clownasset"] <- "Client has sole or joint ownership of any asset"
 asset$var[asset$var == "OwnREH"] <- "Client or Spouse has real estate/home"
 asset$var[asset$var == "num_REH"] <- "Number of real estate holdings/houses owned by Client or Spouse"
@@ -190,23 +192,23 @@ asset$var[asset$var == "num_Loan"] <- "Number of loans owned by Client or Spouse
 asset$var[asset$var == "clownLoan"] <- "Client has sole or joint ownership of loan"
 asset$var[asset$var == "desOPLoan"] <- "Client wants spouse to own loan debt"
 
-# create separate table for asset tab
+# create separate table for asset tab, as mentioned above
+
 asset_tab <- asset
 
-# combine the demo, income, marriage, family, and asset tables
+# combine the demo, income, marriage, family, and asset tables.
 
 table_data <- asset %>%
   merge(income, all = TRUE) %>%
   merge(demo_data, all = TRUE) %>%
   merge(marr, all = TRUE) %>%
   merge(fam, all = TRUE) %>%
-  # set up different columsn for pvalues
+  # set up different columns for pvalues
   mutate(filing_p_val = 0, legaiddiv_p_val = 0, interp_p_val = 0, trted_p_val = 0)
 
 var_names <- unique(table_data$var)
 
-# calculate p values comparing across filing status
-
+# calculate p values comparing across filing status. when i first wrote this, it was only for divorce status, but then albert suggested doing it for other variables too. there's probably a way to turn this into a function, but it was easier to just reuse this little for loop for the other things. 
 i <- 1
 
 for(i in 1:length(var_names)) {
@@ -233,7 +235,7 @@ for(i in 1:length(var_names)) {
   table_data$trted_p_val[table_data$var == var_names[i]] <- t.test(table_data$val[table_data$var == var_names[i]] ~ table_data$Trted[table_data$var == var_names[i]], conf.level = 0.95)$p.value
 }
 
-# prepare table with means, mean difference, and p value across filing status, legal aid division, and interpreter. I already did it with just filing data when i decided to do the other ones too and i figured it was easier to just copy the code and change the variables and then combine than to try to change the code to do all of the comparisons at once
+# prepare table with means, mean difference, and p value across filing status, legal aid division, and interpreter. I already did it with just filing data when i decided to do the other ones too and i figured it was easier to just copy the code and change the variables and then combine than to try to change the code to do all of the comparisons at once. basically this entire section could be more ~stylish~ in terms of the code, but it deos everything it's supposed to, and there's a reason behind the redundancy - it was just the easiest way of adding on new categories without breaking anything. I tried to add it into the initial stuff, but it turned out wonky and i didn't feel like trying to fix it when there was an easier way around th eissue.
 
 filing_data <-table_data %>%
   group_by(filingstatus3, var, filing_p_val, type) %>%
@@ -322,6 +324,7 @@ treatment <- treatment %>%
   select(var, no_trted, yes_trted, mean_diff_trted, trted_p_val, type) %>%
   ungroup()
 
+# combine all the pretty little subtables to use in the big table
 table_data <- filing_data %>%
   merge(legaiddiv_data, all = TRUE) %>%
   merge(interp_data, all = TRUE) %>%
@@ -331,7 +334,7 @@ table_data <- filing_data %>%
 
 ```{r}
 
-# make variables nice for table, because this is what's getting presented. probably there's a prettier way how to do this, but i just went ahead and hard coded all the changes in because eh it works
+# make variables nice for table, because this is what's getting presented. maybe 70% of the way into typing all this up, i realized that it probably would have been easier to just make a new column with these values or to make it a vector and then loop through changing all of it, but by that point i was in too deep. 
 
 table_data$var[table_data$var == "IsFemCl"] <- "Female"
 table_data$var[table_data$var == "age"] <- "Age"
@@ -385,8 +388,10 @@ table_data$var[table_data$var == "chldmar18cust"] <- "Client desires custody ove
 table_data$var[table_data$var == "chldmar18supp"] <- "Client desires child support for child of marriage under 18"
 
 # get everything into the right order with fct_relevel because table will be grouped
+
 table_data <- table_data %>%
   mutate(var = as.factor(var)) %>%
+  # this part made me feel better about not just adding a new column or something, because honestly it looks just as ugly (if not more ugly) as a big block like this as it did when it was being done line by line above.
   mutate(var = fct_relevel(var, c("Female", "Age", "Black/African-American", "Hispanic/Latino/of Spanish origin", "White/Caucasian", "Other Race", "English primarily spoken in marital home", "Client has history of mental or physical disability", "Spouse has history of mental or physical disability","Client has history of alcohol or substance abuse", "Spouse has history of alcohol or substance abuse", "Client has criminal record", "Spouse has criminal record", "Client Employed", "Spouse employed", "Client's monthly employment income", "Spouse's monthly employment income", "Food stamps", "SSI or SSDI", "TANF or other welfare", "Other income", "Client has pension solely in his/her name", "Spouse has pension solely in his/her name", "Client has health insurance", "Client is policyholder of client's health insurance", "Client has sole or joint ownership of any asset", "Client or Spouse has real estate/home", "Number of real estate holdings/houses owned by Client or Spouse", "Client has sole or joint ownership of real estate/house", "Client wants sole/partial ownership of real estate/house", "Client or Spouse has automobile","Number of automobiles owned by Client or Spouse", "Client has sole or joint ownership of automobile", "Client wants sole/partial ownership of automobile", "Client or Spouse has pension/annuity", "Number of pensions/annuities owned by Client or Spouse", "Client has sole or joint ownership of pension/annuity", "Client wants sole/partial ownership of pension/annuity", "Client or Spouse has bank account", "Number of bank accounts owned by Client or Spouse", "Client has sole or joint ownership of bank account", "Client wants sole/partial ownership of bank account", "Client or Spouse has business", "Number of businesses owned by Client or Spouse", "Client has sole or joint ownership of business", "Client wants sole/partial ownership of business", "Client or Spouse has credit card", "Number of credit cards owned by Client or Spouse", "Client has sole or joint ownership of credit card", "Client wants spouse to own credit card debt", "Client or Spouse has loan", "Number of loans owned by Client or Spouse", "Client has sole or joint ownership of loan", "Client wants spouse to own loan debt", "Years of marriage", "Spouse currently lives in client's home", "Client is previously divorced", "Client is current beneficiary of spousal support order", "Client wants spousal support", "Spouse is making economic claims", "Client has had PFA order entered against him/her", "Client has had PFA order entered protecting him/her", "Spouse has had PFA order entered against him/her", "Grounds for divorce: 2-year separation", "Grounds for divorce: mutual consent", "Grounds for divorce: desertion", "Grounds for divorce: indignities", "Grounds for divorce: other", "Number of children of either spouse", "Client has child of marriage", "Client has child of marriage under 18", "Client desires custody over child of marriage under 18", "Client desires child support for child of marriage under 18"))) %>%
   arrange(var) %>%
   # make sure the data is numeric
@@ -409,12 +414,12 @@ plot_data$key[plot_data$key == "trted_p_val"] <- "Treatment"
 ```
 
 ```{r}
-# prepare mini table with just stuff about wages
+# prepare mini table with just stuff about wages. The zero incomes are being excluded because i don't want them on the histogram. i just want to show the incomes of people who actually have incomes. otherwise, its too dramatically skewed.
 
 wage_data <- all_data %>%
   filter(!is.na(MonthWageCl), MonthWageCl != 0, !is.na(AmtMnthIncOP), AmtMnthIncOP != 0, AmtMnthIncOP <= 15000) 
 
-# figure out how many clients are unemployed
+# figure out how many clients are unemployed, so that i can show the percentage of people who are unemployed. 
 
 number_zero_cl <- all_data %>%
   select(RefNum, MonthWageCl) %>%
@@ -428,7 +433,7 @@ number_zero_op <- all_data %>%
   filter(AmtMnthIncOP == 0) %>%
   count(AmtMnthIncOP)
 
-# mini table with just length of marriage
+# mini table with just length of marriage. in hindsight, i didn't really need to do this, but i think at the time i though i might add more the the marriage tab. but i never actually ended up thinking of anything else that would be good to add and no one suggested anything
 
 marr_data <- all_data %>%
   select(lengthmar) %>%
@@ -445,15 +450,13 @@ race_data <- all_data %>%
   select(race, n) %>%
   mutate(race = fct_relevel(race, c("Black", "Hispanic", "White", "Asian", "Other")))
 
-# calculate percent black and save to var to be displayed. Honestly could have just used the table 
-# thing in hindsight, but this is already here and works.
+# calculate percent black and save to var to be displayed. As i write these comments (note that i'm writing these comments mostly after finishing the app) I realize I could have just used the table thing, but this is already here and works.
 
 total = sum(race_data$n)
 
 pct_blck = paste0(round((race_data$n[race_data$race == "Black"] / total) * 100, digits = 2), "%")
 
-
-# get all the clients who are getting benefits and sum
+# get all the clients who are getting benefits and sum so that it can be a number used later to give percentage of clients on some sort of benefits.
 
 ben_data <- all_data %>%
   filter(IsBenSpSupCl == 1 | IsTANFCl == 1 | IsSSIOrSSDICl == 1 | IsSSCl == 1 | IsOthRetCl == 1 | IsUnempCl == 1 | IsFdStmpCl == 1 | IsOthIncCl == 1) %>%
@@ -467,7 +470,8 @@ child_data <- all_data %>%
   summarise("zero" = sum(num_chld == "0"), "one" = sum(num_chld == "1"), "two" = sum(num_chld == "2"), "three" = sum(num_chld == "3"), "four" = sum(num_chld == "4"), "five" = sum(num_chld == "5")) %>%
   gather(key = "num", val = "total", zero, one, two , three, four, five)
 
-# percent w no children
+# percent w no children. similar to the thing with percent black, it probably wasn't totally necessary - though it did save a bit of code on the shiny app, which is nice since you can't test stuff as easily with shiny I've found.
+
 none = paste0(round((child_data$total[child_data$num == "zero"]/sum(child_data$total)) * 100, digits = 2), "%")
 
 # create separate table for asset tab plot with var and val columns, add grou pand type also to sort the graph

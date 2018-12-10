@@ -12,13 +12,14 @@ ui <- fluidPage(theme = shinytheme("flatly"),
   # title
   titlePanel("Access to Justice Lab - Philadelphia Divorce Study"),
   
-  # tabs
+  # tabs. i did navbarPage here after seeing someones app with this theme because the nice dark bar looks pretty
   navbarPage("A2J",
     # summary tab gives summary info, table and plot of p values produced by t-tests
     tabPanel("Summary",
              tabsetPanel(
                tabPanel("About",
-                        # explanations of what the data is about
+                        # explanations of what the data is about. a lot of this stuff is already in the README, but this can be good
+                        # if the user skipped the README
                         h3("What is the Access to Justice Lab?"),
                         h5("The Access to Justice Lab is a research clinic at Harvard Law School. The Lab runs randomized
                            control trials in the legal system in order to assess how accessible various components are
@@ -36,7 +37,9 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                            divorce. For the purposes of this project, these people have been included in order to examine
                            the demographic and other information collected in the interview.")
                ),
-               # comparison table with means, mean difference, and p-values of variables
+               # comparison table with means, mean difference, and p-values of variables. the table is nice for
+               # seeing the direction of the differences and lets you also see which differences are 
+               # statistically significant. 
                tabPanel("Comparison Table",
                  sidebarLayout(
                    sidebarPanel(
@@ -55,7 +58,10 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                      )
                   )
                ),
-               # comparison plot displaying jittered plot of p-values
+               # comparison plot displaying jittered plot of p-values. This doesn't let you see the direction of
+               # the differences, but it's nice because it lets you visualize how many dots are significant differences
+               # versus insignificant. The "all" option is especially nice because you can see whether a variable 
+               # was significantly different across various comparisons.
                tabPanel("Comparison Plot",
                         sidebarLayout(
                           sidebarPanel(
@@ -104,7 +110,8 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                )
              )
     ),
-    # income tab that includes histograms and summary statistics of client and opposition wages
+    # income tab that includes histograms and summary statistics of client and opposition wages. the bins
+    # and the scale for the histogram is the same so that you can easily compare the wages
     tabPanel("Income",
              sidebarLayout(
                sidebarPanel(width = 3, sliderInput("wageBins",
@@ -342,7 +349,7 @@ server <- function(input, output, session) {
     }
   }
   
-  # render the comparison plot
+  # render the comparison plot, pretty simple
   
   output$mainPlot <- renderPlot ({
     filteredData <- plot_data %>%

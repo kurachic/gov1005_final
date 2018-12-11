@@ -54,6 +54,15 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                  selected = "pla")
                    ),
                    mainPanel(
+                     h2("How to interpret the table"),
+                     h5("The variables shown below are mostly dummy variables, coded as 1 or 0, so the means shown below reflect the percentage of respondents that were female,
+                        of various races, etc. For variables that were not dummy variables, such as income, the mean is simply the mean. The mean difference is calculated
+                        as the third column minus the second column and shows the direction of the difference."),
+                      h5("The final column, P Value, shows whether that difference is 
+                        statistically significant. A difference is considered statistically significant if the p-value is lower than 0.05. Some
+                        statistically significant values make sense or are obvious. For example, there are significantly more Hispanic clients 
+                        in the group who need interpreters compared to the group that did not need interpreters. Other differences are harder to explain.
+                        Why do you think people who needed interpreters had longer marriages?"),
                      tableOutput("mainTable")
                      )
                   )
@@ -81,6 +90,10 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                             actionButton("selectall", label="Select/Deselect all")
                           ),
                           mainPanel(
+                            h2("How to interpret the plot"),
+                            h5("The vertical line is drawn at the point of statistical significance - 0.05. That means all values
+                               to the left of this line are statistically significant, while those to the right of the line
+                               are not statistically significant. The placement of the point on the y axis has no meaning."),
                             plotOutput("mainPlot")
                           )
                         )
@@ -125,13 +138,14 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                  # notice participant wages lower than opposition party wages
                  h2("Participant Wages"),
                  # report percent unemployed
-                 h5(paste0(round((number_zero_cl$n / 378) * 100), "%", " of participants are unemployed and do not earn monthly wages. For those participants who do earn monthly wages, a histogram of their wages is presented below")),
+                 h5(paste0(round((number_zero_cl$n / 378) * 100), "%", " of participants are unemployed and do not earn monthly wages. For those participants who do earn monthly wages, a histogram of their wages is presented below.")),
                  plotOutput("wagePlotCl"),
                  # report percent on government benefits
                  h5(paste0(round((ben_data$n / 378) * 100), "%", " have other sources of support, such as welfare, SSI, SSDI, spousal support, unemployment, food stamps, or other benefits.")),
                  h2("Opposition Party Wages"),
                  # report percent unemployed
-                 h5(paste0(round((number_zero_op$n / 378) * 100), "%", " of opposition parties are unemployed and do not earn monthly wages. Below is a histogram of the opposition party's approximate monthly income.")),
+                 h5(paste0(round((number_zero_op$n / 378) * 100), "%", " of opposition parties are unemployed and do not earn monthly wages. Below is a histogram of the opposition party's approximate monthly income. Notice that
+                           the opposition party wages tend to be higher.")),
                  plotOutput("wagePlotOP")
                )
              )
@@ -140,7 +154,8 @@ ui <- fluidPage(theme = shinytheme("flatly"),
     # their low incomes.
     tabPanel("Assets",
       mainPanel(
-        h5(paste0(round((asset_tab$n[asset_tab$var == "Client has sole or joint ownership of any asset"] / 378) * 100), "%", " of participants
+        h2("Assets and Liabilities"),
+        h5(paste0("Real estate, pensions/annuities, businesses, bank accounts, and automobiles are considered assets, while loans and credit cards are considered debts/liabilities. ", round((asset_tab$n[asset_tab$var == "Client has sole or joint ownership of any asset"] / 378) * 100), "%", " of participants
                   own some asset.")),
         plotOutput("assetPlot")
       )
@@ -168,6 +183,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
     # family tab with graph of number of children each client has
     tabPanel("Family",
       mainPanel(
+        h2("Children"),
         h5("A bar graph of how many children clients have is
            displayed below.",none, "have no children."),
         plotOutput("childPlot")
@@ -362,7 +378,10 @@ server <- function(input, output, session) {
     }
     
     if(length(input$plotvars) > 0) {
-      ggplot(filteredData, aes(x=value, y = 1, col = key)) + geom_jitter() + geom_vline(xintercept = 0.05) + labs(x = "P Value", y = "", col = "Comparison Group")
+      ggplot(filteredData, aes(x=value, y = 1, col = key)) + geom_jitter() + geom_vline(xintercept = 0.05) + 
+        labs(x = "P Value", y = "", col = "Comparison Group") +
+        theme(axis.text.y=element_blank(),
+              axis.ticks.y=element_blank())
     }
     else {
       # this just results in showing nothing, which is fine. I've found that adding text doesn't show, and I'm
@@ -391,7 +410,12 @@ server <- function(input, output, session) {
    
   # race histogram
   output$racePlot = renderPlot ({
-    ggplot(race_data, aes(x = race, y = n)) + geom_bar(stat = "identity") + labs(x = "Race", y = "")
+    ggplot(race_data, aes(x = race, y = n)) + geom_bar(stat = "identity") + labs(x = "Race", y = "Number of Participants") + 
+      theme(axis.line = element_line(colour = "black"), 
+            panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(), 
+            panel.border = element_blank(), 
+            panel.background = element_blank()) 
   })
    
   # age histogram
@@ -401,7 +425,7 @@ server <- function(input, output, session) {
     bins <- seq(0, max(x, na.rm = TRUE), length.out = input$ageBins + 1)
      
     # draw the histogram with the specified number of bins
-    hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Participant Age", xlab = "Age")
+    hist(x, breaks = bins, col = 'darkgray', border = 'white', xlab = "Age", main = NA)
   })
    
   # marriage histogram with marriage length
@@ -411,13 +435,17 @@ server <- function(input, output, session) {
     bins <- seq(0, max(x), length.out = input$marrBins + 1)
      
     # draw the histogram with the specified number of bins
-    hist(x, breaks = bins, col = 'darkgray', border = 'white', main = "Histogram of Marriage Length", xlab = "Marriage Length in Years")
+    hist(x, breaks = bins, col = 'darkgray', border = 'white', xlab = "Marriage Length in Years", main = NA)
   })
   
   # child bar graph, number of clients with x number of children
   output$childPlot = renderPlot ({
-    ggplot(all_data, aes(x = as.factor(num_chld))) + geom_bar() + labs(x = "Number of Children", y = "")
-        
+    ggplot(all_data, aes(x = as.factor(num_chld))) + geom_bar() + labs(x = "Number of Children", y = "Number of Participants") +
+      theme(axis.line = element_line(colour = "black"), 
+            panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(), 
+            panel.border = element_blank(), 
+            panel.background = element_blank()) 
   })
   
   output$assetPlot = renderPlot ({
@@ -430,8 +458,15 @@ server <- function(input, output, session) {
     ggplot(data, aes(group, n)) + geom_bar(aes(fill = type), 
       width = 0.4, position = position_dodge(width=0.5), stat="identity") +  
       theme(legend.position="top", legend.title = 
-              element_blank(),axis.title.x=element_blank(), 
-            axis.title.y=element_blank()) + coord_flip()
+            element_blank(),
+            axis.title.x=element_blank(), 
+            axis.title.y=element_blank(),
+            axis.line = element_line(colour = "black"), 
+            panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(), 
+            panel.border = element_blank(), 
+            panel.background = element_blank()) + 
+    coord_flip()
   })
   
 }

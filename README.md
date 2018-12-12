@@ -13,7 +13,7 @@ The Access to Justice Lab is a research clinic at Harvard Law School. The Lab ru
 
 **What is the Philadelphia Divorce Study?**
 
-The Philadelphia Divorce Study randomized people looking for divorce into two groups - having a lawyer, and not having a lawyer but having self-help materials. The Lab partnered with Philadelphia Legal Services (PLA) and Philadelphia VIP to offer representation. Approximately a year into the study, budgetary restricts resulted in PLA terminating representation for divorce cases other than those involving domestic violence or other special circumstances, resulting in increased referrals to Philadelphia VIP.
+The Philadelphia Divorce Study randomized people looking for divorce into two groups - having a lawyer, and not having a lawyer but having self-help materials. The Lab partnered with Philadelphia Legal Assistance (PLA) and Philadelphia VIP to offer representation. Approximately a year into the study, budgetary restricts resulted in PLA terminating representation for divorce cases other than those involving domestic violence or other special circumstances, resulting in increased referrals to Philadelphia VIP.
 
 **The Data**
 

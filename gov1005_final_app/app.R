@@ -27,7 +27,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                         h3("What is the Philadelphia Divorce Study?"),
                         h5("The Philadelphia Divorce Study randomized people looking for divorce into two groups - having a lawyer,
                            and not having a lawyer but having self-help materials. The Lab partnered with Philadelphia Legal
-                           Services (PLA) and Philadelphia VIP to offer representation. Approximately a year into the study, budgetary 
+                           Assistance (PLA) and Philadelphia VIP to offer representation. Approximately a year into the study, budgetary 
                            restricts resulted in PLA terminating representation for divorce cases other than those
                            involving domestic violence or other special circumstances, resulting in increased referrals to 
                            Philadelphia VIP."),
@@ -61,8 +61,8 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                       h5("The final column, P Value, shows whether that difference is 
                         statistically significant. A difference is considered statistically significant if the p-value is lower than 0.05. Some
                         statistically significant values make sense or are obvious. For example, there are significantly more Hispanic clients 
-                        in the group who need interpreters compared to the group that did not need interpreters. Other differences are harder to explain.
-                        Why do you think people who needed interpreters had longer marriages?"),
+                        in the group who need interpreters compared to the group that did not need interpreters, which makes sense - they
+                        probably speak Spanish. Other differences are harder to explain. Why do you think people who needed interpreters had longer marriages?"),
                      tableOutput("mainTable")
                      )
                   )

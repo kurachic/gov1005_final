@@ -432,7 +432,7 @@ server <- function(input, output, session) {
   output$marrPlot = renderPlot({
     # generate bins based on input$marrBins from ui.R
     x    <- marr_data$lengthmar
-    bins <- seq(0, max(x), length.out = input$marrBins + 1)
+    bins <- seq(0, 55, length.out = input$marrBins + 1)
      
     # draw the histogram with the specified number of bins
     hist(x, breaks = bins, col = 'darkgray', border = 'white', xlab = "Marriage Length in Years", main = NA)

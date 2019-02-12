@@ -398,6 +398,7 @@ table_data <- table_data %>%
   mutate(none_filed = as.numeric(none_filed), spouse_filed = as.numeric(spouse_filed), yes_interp = as.numeric(yes_interp), no_interp = as.numeric(no_interp), post = as.numeric(post), pre = as.numeric(pre), yes_trted = as.numeric(yes_trted), no_trted = as.numeric(no_trted))
 ```
 
+
 ```{r}
 # turn the data into long format for the plot
 
@@ -411,6 +412,21 @@ plot_data$key[plot_data$key == "filing_p_val"] <- "Filing Status"
 plot_data$key[plot_data$key == "legaiddiv_p_val"] <- "PLA Status"
 plot_data$key[plot_data$key == "interp_p_val"] <- "Interpreter"
 plot_data$key[plot_data$key == "trted_p_val"] <- "Treatment"
+```
+
+```{r}
+# round the numbers for the table
+
+round_df <- function(df, digits) {
+  nums <- vapply(df, is.numeric, FUN.VALUE = logical(1))
+
+  df[,nums] <- round(df[,nums], digits = digits)
+
+  (df)
+}
+
+table_data <- round_df(table_data, digits=3)
+
 ```
 
 ```{r}

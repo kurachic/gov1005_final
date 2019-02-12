@@ -378,7 +378,7 @@ server <- function(input, output, session) {
     }
     
     if(length(input$plotvars) > 0) {
-      ggplot(filteredData, aes(x=value, y = 1, col = key)) + geom_jitter() + geom_vline(xintercept = 0.05) + 
+      ggplot(filteredData, aes(x=value, y = 1, col = key)) + geom_jitter(size = 3, alpha = 0.7) + geom_vline(xintercept = 0.05) + 
         labs(x = "P Value", y = "", col = "Comparison Group") +
         theme(axis.text.y=element_blank(),
               axis.ticks.y=element_blank())
